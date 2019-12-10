@@ -1,27 +1,18 @@
-# CC=gcc
-# CFLAGS=-W -Wall
-# EXEC=main
+EXEC=level_0
+PREFIX=compilateur
+CCFLAGS= -o $(EXEC)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    CCFLAGS += -lfl
+endif
+ifeq ($(UNAME_S),Darwin)
+    CCFLAGS += -ll -ly
+endif
 
-# all: $(EXEC)
-
-# main: lib_0.o main.o
-# 	$(CC) -o $@ $^ $(LDFLAGS)
-
-# lib_0.o: level_0/lib_0.c
-# 	$(CC) -o $@ -c $^ -W -Wall
-
-# main.o: main.c  level_0/lib_0.h
-# 	$(CC) -o $@ -c $<
-
-# clean:
-# 	rm *.o $(EXEC)
-
-prefixe=compilateur
-
-all: $(prefixe).y $(prefixe).l ast.c ast.h
-	yacc -d $(prefixe).y
-	lex $(prefixe).l
-	gcc y.tab.c lex.yy.c ast.c -ly -ll
+all: $(PREFIX).y $(PREFIX).l ast.c ast.h
+	yacc -d $(PREFIX).y
+	lex $(PREFIX).l
+	gcc y.tab.c lex.yy.c ast.c $(CCFLAGS)
 
 clean:
-	rm *.o y.tab.c y.tab.h lex.yy.c a.out
+	rm *.o y.tab.c y.tab.h lex.yy.c a.out $(EXEC)
