@@ -70,6 +70,11 @@ arith_expr:
 
 %%
 
+void yyerror(char* msg) {
+    printf("syntax error: %s\n", msg);
+    exit(1);
+}
+
 int main(int argc, char* argv[]) {
 
     if (argc < 2)
