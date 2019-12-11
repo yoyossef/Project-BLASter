@@ -10,14 +10,22 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 %%
 
+"if"            { return IF; }
+"while"         { return WHILE; }
+"else"          { return ELSE; }
+"for"           { return FOR; }
+
+
+
 {comment}       { }
 {identifier}    { yylval.string = strdup(yytext); return ID; }
 {integer}       { yylval.value = atoi(yytext); return NUMBER; }
 
 
 
-[=+\-\*/()]      { return yytext[0]; }  
-[{},;\n\t ]     { return yytext[0]; }  
+[=+\-\*/()]     { return yytext[0]; }  
+[{},;]          { return yytext[0]; }  
+[\n\t ]         { }  
 .               { printf("Caractere inconnu: %s", yytext); }
 
 %%

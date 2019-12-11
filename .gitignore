@@ -3,6 +3,6 @@ main
 *y.tab.c 
 *y.tab.h 
 *lex.yy.c
-*.out
+a.out*
 *.DS_Store
 test.txt
