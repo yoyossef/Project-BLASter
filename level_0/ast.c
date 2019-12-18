@@ -169,3 +169,85 @@ void print_indent(int indent) {
     for (int i = 0; i < indent; i++)
         printf("\t");
 }
+
+void ast_to_source(ast* ast, int indent) {
+    int new_indent = indent;
+
+    // AST_ADD, AST_SUB, AST_MUL, AST_DIV
+    if (ast->type >= 2 && ast->type <= 5)
+        printf("(");
+
+    switch(ast->type) {
+        case AST_BLOCK:
+            printf("{\n");
+            new_indent++;
+            break;
+        case AST_LIST:
+            print_indent(new_indent);
+            break;
+        case AST_ID:
+            printf("%s", ast->id);
+            break;
+        case AST_NUMBER:
+            printf("%d", ast->number);
+            break;
+        case AST_FOR:
+            printf("for");
+            break;
+        case AST_WHILE:
+            printf("while");
+            break;
+        case AST_IF:
+            printf("if");
+            break;
+        case AST_ELSE:
+            printf("else");
+            break;
+        case AST_ELSE_IF:
+            printf("else if");
+            break;
+        default:
+            break;
+    };
+
+    if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
+        ast_to_source(ast->left, new_indent);
+
+    switch(ast->type) {
+        case AST_ADD:
+            printf("+");
+            break;
+        case AST_SUB:
+            printf("-");
+            break;
+        case AST_MUL:
+            printf("*");
+            break;
+        case AST_DIV:
+            printf("/");
+            break;
+        case AST_AFFECT:
+            printf("=");
+            break;
+        default:
+            break;
+    };
+
+    if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->right != NULL)
+        ast_to_source(ast->right, new_indent);
+
+    switch (ast->type) {
+        case AST_BLOCK:
+            new_indent--;
+            print_indent(new_indent);
+            printf("}\n");
+            break;
+        case AST_AFFECT:
+            printf(";\n");
+        default:
+            break;
+    }
+
+    if (ast->type >= 2 && ast->type <= 5)
+        printf(")");
+}
