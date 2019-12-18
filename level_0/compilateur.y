@@ -61,6 +61,12 @@ instructions_list:
 instruction:
     declaration ';'                     { $$ = $1; }
     | affectation ';'                   { $$ = $1; }
+    | INT ID '=' arith_expr ';'                   
+        { 
+            ast* tmp1 = ast_new_operation(AST_TYPE_INT, ast_new_id($2), NULL);
+            ast* tmp2 = ast_new_operation(AST_AFFECT, ast_new_id($2), $4);
+            $$ = ast_new_operation(AST_LIST, tmp1, tmp2); 
+        }
     | FOR '(' affectation ';' condition ';' affectation ')' block 
         { 
             ast* tmp1 = ast_new_operation(AST_LIST, $5, $7);
