@@ -22,7 +22,7 @@
 %type <ast> instructions_list
 %type <ast> instruction
 %type <ast> instruction_if
-%type <ast> instructions_elif
+%type <ast> statement_elif
 %type <ast> instruction_elif
 %type <ast> instruction_else
 %type <ast> affectation
@@ -61,15 +61,15 @@ instruction:
     | FOR block                             { $$ = ast_new_operation(AST_FOR, NULL, $2); }
     | WHILE '(' condition ')' block         { $$ = ast_new_operation(AST_WHILE, $3, $5); }
     | instruction_if                        { $$ = $1; }
-    | instruction_if instructions_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | instruction_if statement_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
     ;
 
 instruction_if:
     IF '(' condition ')' block        { $$ = ast_new_operation(AST_IF, $3, $5); }
     ;
 
-instructions_elif:
-    instruction_elif instructions_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+statement_elif:
+    instruction_elif statement_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
     | instruction_else                      { $$ = $1; }
     ;
 

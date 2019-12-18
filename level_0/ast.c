@@ -43,11 +43,13 @@ void ast_free(ast* ast) {
 }
 
 void ast_print(ast* ast, int indent) {
-    if (ast == NULL)
-        return ;
-
     for (int i = 0; i < indent; i++)
         printf("    ");
+    
+    if (ast == NULL){
+        printf("NULL\n");
+        return ;
+    }
 
     switch(ast->type) {
         case AST_ID:
