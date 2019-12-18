@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
     // Be clean.
     lex_free();
     ast_free(parser_ast);
+    fclose(yyin);
     
     return 0;
 }
