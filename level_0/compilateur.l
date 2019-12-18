@@ -23,10 +23,19 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 
 
-[=+\-\*/()]     { return yytext[0]; }  
-[{},;]          { return yytext[0]; }  
-[\n\t ]         { }  
-.               { printf("Caractere inconnu: %s", yytext); }
+"=="            { return EQUAL; }
+"!="		    { return DIFF;}
+">="            { return GEQ; }
+"<="            { return LEQ; }
+"&&"            { return AND; }
+"||"            { return OR; }
+
+
+
+[=+\-\*/()<>]       { return yytext[0]; }  
+[{},;]              { return yytext[0]; }  
+[\n\t ]             { }  
+.                   { printf("Caractere inconnu: %s", yytext); }
 
 %%
 

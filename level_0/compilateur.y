@@ -21,13 +21,24 @@
 %type <ast> block
 %type <ast> instructions_list
 %type <ast> instruction
+%type <ast> instruction_if
+%type <ast> instructions_elif
+%type <ast> instruction_elif
+%type <ast> instruction_else
 %type <ast> affectation
 %type <ast> arith_expr
+%type <ast> condition
 
-%token FOR WHILE IF ELSE 
+%token GEQ LEQ
+%token EQUAL DIFF
+%token AND OR
+%token FOR WHILE
+%token IF ELSE 
 
 %left '+' '-'
 %left '*' '/'
+%left OR
+%left AND
 
 %%
 
@@ -46,12 +57,28 @@ instructions_list:
     ;
 
 instruction:
-    affectation ';'                 { $$ = $1; }
-    | FOR block                     { $$ = ast_new_operation(AST_FOR, NULL, $2); }
-    | WHILE block                   { $$ = ast_new_operation(AST_WHILE, NULL, $2); }
-    | IF block                      { $$ = ast_new_operation(AST_IF, NULL, $2); }
-    | ELSE block                    { $$ = ast_new_operation(AST_ELSE, NULL, $2); }
-    | ELSE IF block                 { $$ = ast_new_operation(AST_ELSE_IF, NULL, $3); }
+    affectation ';'                         { $$ = $1; }
+    | FOR block                             { $$ = ast_new_operation(AST_FOR, NULL, $2); }
+    | WHILE '(' condition ')' block         { $$ = ast_new_operation(AST_WHILE, $3, $5); }
+    | instruction_if                        { $$ = $1; }
+    | instruction_if instructions_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    ;
+
+instruction_if:
+    IF '(' condition ')' block        { $$ = ast_new_operation(AST_IF, $3, $5); }
+    ;
+
+instructions_elif:
+    instruction_elif instructions_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | instruction_else                      { $$ = $1; }
+    ;
+
+instruction_elif:
+    ELSE IF '(' condition ')' block       { $$ = ast_new_operation(AST_ELSE_IF, $4, $6); }
+    ;
+
+instruction_else:
+    ELSE block                  { $$ = ast_new_operation(AST_ELSE, NULL, $2); }
     ;
 
 affectation:
@@ -66,6 +93,18 @@ arith_expr:
     | '(' arith_expr ')'            { $$ = $2; }
     | ID                            { $$ = ast_new_id($1); }
     | NUMBER                        { $$ = ast_new_number($1); }
+    ;
+
+condition:
+    condition OR condition          { $$ = ast_new_operation(AST_OR, $1, $3); }
+    | condition AND condition       { $$ = ast_new_operation(AST_AND, $1, $3); }
+    | '(' condition ')'             { $$ = $2; }
+    | arith_expr EQUAL arith_expr   { $$ = ast_new_operation(AST_EQUAL, $1, $3); }
+    | arith_expr DIFF arith_expr    { $$ = ast_new_operation(AST_DIFF, $1, $3); }
+    | arith_expr GEQ arith_expr     { $$ = ast_new_operation(AST_GEQ, $1, $3); }
+    | arith_expr LEQ arith_expr     { $$ = ast_new_operation(AST_LEQ, $1, $3); }
+    | arith_expr '>' arith_expr     { $$ = ast_new_operation(AST_SUP, $1, $3); }
+    | arith_expr '<' arith_expr     { $$ = ast_new_operation(AST_INF, $1, $3); }
     ;
 
 %%

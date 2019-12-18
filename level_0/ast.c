@@ -81,6 +81,46 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
+        case AST_EQUAL:
+            printf("==\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_DIFF:
+            printf("!=\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_GEQ:
+            printf(">=\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_LEQ:
+            printf("<=\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_SUP:
+            printf(">\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_INF:
+            printf("<\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_AND:
+            printf("&&\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_OR:
+            printf("||\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
         case AST_FOR:
             printf("for\n");
             ast_print(ast->left, indent + 1);
