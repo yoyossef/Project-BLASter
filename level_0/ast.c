@@ -78,6 +78,11 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
+        case AST_TYPE_INT:
+            printf("TYPE_INT\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
         case AST_AFFECT:
             printf("=\n");
             ast_print(ast->left, indent + 1);

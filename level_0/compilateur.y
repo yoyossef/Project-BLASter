@@ -26,9 +26,11 @@
 %type <ast> instruction_elif
 %type <ast> instruction_else
 %type <ast> affectation
+%type <ast> declaration
 %type <ast> arith_expr
 %type <ast> condition
 
+%token INT
 %token GEQ LEQ
 %token EQUAL DIFF
 %token AND OR
@@ -57,32 +59,42 @@ instructions_list:
     ;
 
 instruction:
-    affectation ';'                         { $$ = $1; }
-    | FOR block                             { $$ = ast_new_operation(AST_FOR, NULL, $2); }
-    | WHILE '(' condition ')' block         { $$ = ast_new_operation(AST_WHILE, $3, $5); }
-    | instruction_if                        { $$ = $1; }
-    | instruction_if statement_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    declaration ';'                     { $$ = $1; }
+    | affectation ';'                   { $$ = $1; }
+    | FOR '(' affectation ';' condition ';' affectation ')' block 
+        { 
+            ast* tmp1 = ast_new_operation(AST_LIST, $5, $7);
+            ast* tmp2 = ast_new_operation(AST_LIST, $3, tmp1);
+            $$ = ast_new_operation(AST_FOR, tmp2, $9); 
+        }
+    | WHILE '(' condition ')' block     { $$ = ast_new_operation(AST_WHILE, $3, $5); }
+    | instruction_if                    { $$ = $1; }
+    | instruction_if statement_elif     { $$ = ast_new_operation(AST_LIST, $1, $2); }
     ;
 
 instruction_if:
-    IF '(' condition ')' block        { $$ = ast_new_operation(AST_IF, $3, $5); }
+    IF '(' condition ')' block          { $$ = ast_new_operation(AST_IF, $3, $5); }
     ;
 
 statement_elif:
-    instruction_elif statement_elif      { $$ = ast_new_operation(AST_LIST, $1, $2); }
-    | instruction_else                      { $$ = $1; }
+    instruction_elif statement_elif     { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | instruction_else                  { $$ = $1; }
     ;
 
 instruction_elif:
-    ELSE IF '(' condition ')' block       { $$ = ast_new_operation(AST_ELSE_IF, $4, $6); }
+    ELSE IF '(' condition ')' block     { $$ = ast_new_operation(AST_ELSE_IF, $4, $6); }
     ;
 
 instruction_else:
-    ELSE block                  { $$ = ast_new_operation(AST_ELSE, NULL, $2); }
+    ELSE block          { $$ = ast_new_operation(AST_ELSE, NULL, $2); }
     ;
 
 affectation:
-    ID '=' arith_expr           { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
+    ID '=' arith_expr   { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
+    ;
+
+declaration:
+    INT ID              { $$ = ast_new_operation(AST_TYPE_INT, ast_new_id($2), NULL); }
     ;
 
 arith_expr:

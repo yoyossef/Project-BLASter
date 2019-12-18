@@ -10,6 +10,10 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 %%
 
+"int"           { return INT; }
+
+
+
 "if"            { return IF; }
 "while"         { return WHILE; }
 "else"          { return ELSE; }
