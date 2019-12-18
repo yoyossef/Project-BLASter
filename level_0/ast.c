@@ -43,10 +43,8 @@ void ast_free(ast* ast) {
 }
 
 void ast_print(ast* ast, int indent) {
-    for (int i = 0; i < indent; i++)
-        printf("    ");
-    
-    if (ast == NULL){
+    print_indent(indent);
+    if (ast == NULL) {
         printf("NULL\n");
         return ;
     }
