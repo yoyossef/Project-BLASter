@@ -17,3 +17,4 @@ ast* ast_new_number(int);
 ast* ast_new_id(char*);
 void ast_free(ast*);
 void ast_print(ast*, int);
+void print_indent(int);

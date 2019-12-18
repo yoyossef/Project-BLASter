@@ -117,3 +117,10 @@ void ast_print(ast* ast, int indent) {
             break;
     };
 }
+
+void print_indent(int indent) {
+    if (indent == 0)
+        return;
+    for (int i = 0; i < indent; i++)
+        printf("\t");
+}
