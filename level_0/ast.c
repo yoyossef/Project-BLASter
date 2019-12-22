@@ -174,7 +174,7 @@ void ast_to_source(ast* ast, int indent) {
     int new_indent = indent;
 
     // AST_ADD, AST_SUB, AST_MUL, AST_DIV
-    if (ast->type >= 2 && ast->type <= 5)
+    if (ast->type >= 3 && ast->type <= 6)
         printf("(");
 
     switch(ast->type) {
@@ -248,6 +248,6 @@ void ast_to_source(ast* ast, int indent) {
             break;
     }
 
-    if (ast->type >= 2 && ast->type <= 5)
+    if (ast->type >= 3 && ast->type <= 6)
         printf(")");
 }
