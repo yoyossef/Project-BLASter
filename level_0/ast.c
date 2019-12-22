@@ -191,7 +191,7 @@ void ast_to_source(ast* ast, int indent) {
             printf("for");
             break;
         case AST_WHILE:
-            printf("while");
+            printf("while (");
             break;
         case AST_IF:
             printf("if (");
@@ -257,6 +257,9 @@ void ast_to_source(ast* ast, int indent) {
             break;
         case AST_INF:
             printf("<");
+            break;
+        case AST_WHILE:
+            printf(") ");
             break;
         case AST_IF:
             printf(") ");
