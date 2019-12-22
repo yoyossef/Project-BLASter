@@ -173,10 +173,6 @@ void print_indent(int indent) {
 void ast_to_source(ast* ast, int indent) {
     int new_indent = indent;
 
-    // AST_ADD, AST_SUB, AST_MUL, AST_DIV
-    if (ast->type >= 3 && ast->type <= 6)
-        printf("(");
-
     switch(ast->type) {
         case AST_BLOCK:
             printf("{\n");
@@ -198,15 +194,20 @@ void ast_to_source(ast* ast, int indent) {
             printf("while");
             break;
         case AST_IF:
-            printf("if");
+            printf("if (");
+            break;
+        case AST_ELSE_IF:
+            printf("else if (");
             break;
         case AST_ELSE:
             printf("else");
             break;
-        case AST_ELSE_IF:
-            printf("else if");
+        case AST_AFFECT:
+            break;
+        case AST_TYPE_INT:
             break;
         default:
+            printf("(");
             break;
     };
 
@@ -229,6 +230,36 @@ void ast_to_source(ast* ast, int indent) {
         case AST_AFFECT:
             printf("=");
             break;
+        case AST_AND:
+            printf("&&");
+            break;
+        case AST_OR:
+            printf("||");
+            break;
+        case AST_EQUAL:
+            printf("==");
+            break;
+        case AST_DIFF:
+            printf("!=");
+            break;
+        case AST_GEQ:
+            printf(">=");
+            break;
+        case AST_LEQ:
+            printf("<=");
+            break;
+        case AST_SUP:
+            printf(">");
+            break;
+        case AST_INF:
+            printf("<");
+            break;
+        case AST_IF:
+            printf(") ");
+            break;
+        case AST_ELSE_IF:
+            printf(") ");
+            break;
         default:
             break;
     };
@@ -244,10 +275,10 @@ void ast_to_source(ast* ast, int indent) {
             break;
         case AST_AFFECT:
             printf(";\n");
+            break;
         default:
             break;
     }
-
-    if (ast->type >= 3 && ast->type <= 6)
+    if (ast->type >= 3 && ast->type <= 6 || ast->type >= 8 && ast->type <= 15)
         printf(")");
 }
