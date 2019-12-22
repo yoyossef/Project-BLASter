@@ -205,6 +205,7 @@ void ast_to_source(ast* ast, int indent) {
         case AST_AFFECT:
             break;
         case AST_TYPE_INT:
+            printf("int ");
             break;
         default:
             printf("(");
@@ -215,6 +216,9 @@ void ast_to_source(ast* ast, int indent) {
         ast_to_source(ast->left, new_indent);
 
     switch(ast->type) {
+        case AST_TYPE_INT:
+            printf(";\n");
+            break;
         case AST_ADD:
             printf("+");
             break;
