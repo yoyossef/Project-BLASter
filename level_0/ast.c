@@ -286,6 +286,6 @@ void ast_to_source(ast* ast, int indent) {
         default:
             break;
     }
-    if (ast->type >= 3 && ast->type <= 6 || ast->type >= 8 && ast->type <= 15)
+    if ((ast->type >= 3 && ast->type <= 6) || (ast->type >= 8 && ast->type <= 15))
         printf(")");
 }
