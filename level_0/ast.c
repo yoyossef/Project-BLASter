@@ -170,13 +170,13 @@ void print_indent(int indent) {
         printf("\t");
 }
 
-void ast_to_source(ast* ast, int indent) {
+void ast_to_source(ast* ast, int indent, char is_for) {
     int new_indent = indent;
     // Support of declaration/definition statements (e.g `int a = 3;`)
-    if(ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
+    if (ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
         && ast->right->type == AST_AFFECT) {
         printf("int %s = ", ast->left->left->id);
-        ast_to_source(ast->right->right, indent);
+        ast_to_source(ast->right->right, indent, is_for);
         printf(";\n");
         return;
     }
@@ -187,7 +187,8 @@ void ast_to_source(ast* ast, int indent) {
             new_indent++;
             break;
         case AST_LIST:
-            print_indent(new_indent);
+            if (!is_for)
+                print_indent(new_indent);
             break;
         case AST_ID:
             printf("%s", ast->id);
@@ -196,7 +197,8 @@ void ast_to_source(ast* ast, int indent) {
             printf("%d", ast->number);
             break;
         case AST_FOR:
-            printf("for");
+            is_for = 1;
+            printf("for (");
             break;
         case AST_WHILE:
             printf("while (");
@@ -221,7 +223,12 @@ void ast_to_source(ast* ast, int indent) {
     };
 
     if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
-        ast_to_source(ast->left, new_indent);
+        ast_to_source(ast->left, new_indent, is_for);
+
+    // Adding the semicolumn after the for condition
+    if (is_for && ast->type == AST_LIST && ast->left != NULL 
+        && ast->left->type >= 8 && ast->left->type <= 15)
+        printf(";");
 
     switch(ast->type) {
         case AST_TYPE_INT:
@@ -266,6 +273,10 @@ void ast_to_source(ast* ast, int indent) {
         case AST_INF:
             printf("<");
             break;
+        case AST_FOR:
+            printf(") ");
+            is_for = 0;
+            break;
         case AST_WHILE:
             printf(") ");
             break;
@@ -280,7 +291,7 @@ void ast_to_source(ast* ast, int indent) {
     };
 
     if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->right != NULL)
-        ast_to_source(ast->right, new_indent);
+        ast_to_source(ast->right, new_indent, is_for);
 
     switch (ast->type) {
         case AST_BLOCK:
@@ -289,7 +300,9 @@ void ast_to_source(ast* ast, int indent) {
             printf("}\n");
             break;
         case AST_AFFECT:
-            printf(";\n");
+            printf(";");
+            if (!is_for)
+                printf("\n");
             break;
         default:
             break;
