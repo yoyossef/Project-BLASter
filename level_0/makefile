@@ -1,7 +1,7 @@
 
 EXEC=level_0
 PREFIX=compilateur
-CCFLAGS= -o $(EXEC) -g
+CCFLAGS= -Wall -o $(EXEC) -g
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     CCFLAGS += -lfl
