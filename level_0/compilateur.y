@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
     #include "ast.h"
 
     extern FILE* yyin;
@@ -64,7 +65,7 @@ instruction:
     | INT ID '=' arith_expr ';'                   
         { 
             ast* tmp1 = ast_new_operation(AST_TYPE_INT, ast_new_id($2), NULL);
-            ast* tmp2 = ast_new_operation(AST_AFFECT, ast_new_id($2), $4);
+            ast* tmp2 = ast_new_operation(AST_AFFECT, ast_new_id(strdup($2)), $4);
             $$ = ast_new_operation(AST_LIST, tmp1, tmp2); 
         }
     | FOR '(' affectation ';' condition ';' affectation ')' block 
