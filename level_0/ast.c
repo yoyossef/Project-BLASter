@@ -172,6 +172,14 @@ void print_indent(int indent) {
 
 void ast_to_source(ast* ast, int indent) {
     int new_indent = indent;
+    // Support of declaration/definition statements (e.g `int a = 3;`)
+    if(ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
+        && ast->right->type == AST_AFFECT) {
+        printf("int %s = ", ast->left->left->id);
+        ast_to_source(ast->right->right, indent);
+        printf(";\n");
+        return;
+    }
 
     switch(ast->type) {
         case AST_BLOCK:
