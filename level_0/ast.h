@@ -25,6 +25,8 @@ typedef struct ast {
 ast* ast_new_operation(ast_type, ast*, ast*);
 ast* ast_new_number(int);
 ast* ast_new_id(char*);
+int areIdentical(ast*, ast*);
+int isSubtree(ast*, ast*);
 void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);

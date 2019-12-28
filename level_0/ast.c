@@ -25,6 +25,36 @@ ast* ast_new_id(char* id) {
     return new;
 }
 
+int areIdentical(ast* T, ast* S) {
+    if (T == NULL && S == NULL) 
+        return 1; 
+  
+    if (T == NULL || S == NULL) 
+        return 0; 
+    
+    if ((T->type == AST_NUMBER || T->type == AST_ID) && (T->type == S->type)) 
+        return 1; 
+
+    return (T->type == S->type && areIdentical(T->left, S->left) && areIdentical(T->right, S->right) ); 
+}
+
+int isSubtree(ast* T, ast* S) 
+{ 
+    if (S == NULL) 
+        return 1; 
+  
+    if (T == NULL) 
+        return 0; 
+  
+    if (areIdentical(T, S)) 
+        return 1; 
+
+    if (T->type == AST_NUMBER || T->type == AST_ID) 
+        return 0; 
+  
+    return isSubtree(T->left, S) || isSubtree(T->right, S); 
+} 
+
 void ast_free(ast* ast) {
     if (ast != NULL) {
         switch (ast->type) {
