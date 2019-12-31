@@ -63,6 +63,75 @@ ast** is_subtree(ast* T, ast* S, ast** tab, int* index)
     return tab;
 } 
 
+ast* optimization_arithmetic_operation(ast* T) {
+    char* string = (char*) calloc(BUFFER_SIZE, sizeof(char));
+    
+    if (T->type == AST_ID) {
+        char* new_id = strdup(T->id);
+        free(string);
+        return ast_new_id(new_id);
+    }
+    
+    if (T->type == AST_NUMBER) {
+        snprintf(string, BUFFER_SIZE, "%d", T->number);
+        char* new_nb_id = strdup(string);
+        free(string);
+        return ast_new_id(new_nb_id);
+    }
+    ast* resultat;
+    ast* left = optimization_arithmetic_operation(T->left);
+    ast* right = optimization_arithmetic_operation(T->right);
+
+    char* dest = (char*) calloc(BUFFER_SIZE, sizeof(char));
+
+    switch(T->type) {
+        case AST_ADD:
+            snprintf(dest, BUFFER_SIZE, "opt_add(%s, %s)", left->id, right->id);
+            resultat = ast_new_id(strdup(dest)); 
+            break;
+        case AST_SUB:
+            snprintf(dest, BUFFER_SIZE, "opt_sub(%s, %s)", left->id, right->id);
+            resultat = ast_new_id(strdup(dest));
+            break;
+        case AST_MUL:
+            snprintf(dest, BUFFER_SIZE, "opt_mul(%s, %s)", left->id, right->id);
+            resultat = ast_new_id(strdup(dest));
+            break;
+        case AST_DIV:
+            snprintf(dest, BUFFER_SIZE, "opt_div(%s, %s)", left->id, right->id);
+            resultat = ast_new_id(strdup(dest));
+            break;
+        default:
+            break;
+    }
+
+    ast_free(left);
+    ast_free(right);
+    free(string);
+    free(dest);
+    return resultat;
+}
+
+void optimization_level_zero(ast* T) {
+    if (T == NULL) 
+        return; 
+
+    if (T->type == AST_NUMBER || T->type == AST_ID) 
+        return; 
+
+    if (T->type == AST_AFFECT) {
+        ast* tmp = optimization_arithmetic_operation(T->right);
+        ast_free(T->right);
+        T->right = tmp;
+        return;
+    }
+
+    if (T->type != AST_FOR)
+        optimization_level_zero(T->left);
+
+    optimization_level_zero(T->right);
+}
+
 void ast_free(ast* ast) {
     if (ast != NULL) {
         switch (ast->type) {
@@ -197,6 +266,11 @@ void ast_print(ast* ast, int indent) {
         case AST_BLOCK:
             printf("block\n");
             ast_print(ast->left, indent + 1);
+            break;
+        default:
+            printf("opt function\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
             break;
     };
 }

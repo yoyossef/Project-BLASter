@@ -1,3 +1,5 @@
+#define BUFFER_SIZE 255
+
 typedef enum ast_type { 
     AST_ID, 
     AST_NUMBER, 
@@ -7,7 +9,8 @@ typedef enum ast_type {
     AST_AND, AST_OR, AST_EQUAL, AST_DIFF, AST_GEQ, AST_LEQ, AST_SUP, AST_INF, 
     AST_FOR, AST_WHILE, 
     AST_IF, AST_ELSE_IF, AST_ELSE,  
-    AST_LIST, AST_BLOCK 
+    AST_LIST, AST_BLOCK,
+    AST_OPT_FUN_ADD, AST_OPT_FUN_SUB, AST_OPT_FUN_MUL, AST_OPT_FUN_DIV
 } ast_type;
 
 typedef struct ast {
@@ -31,3 +34,5 @@ void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);
 void ast_to_source(ast*, int, char);
+ast* optimization_arithmetic_operation(ast*);
+void optimization_level_zero(ast*);

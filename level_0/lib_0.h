@@ -1,7 +1,7 @@
-int addition(int, int);
+int opt_add(int, int);
 
-int substraction(int, int);
+int opt_sub(int, int);
 
-int multiplication(int, int);
+int opt_mul(int, int);
 
-int division(int, int);
+int opt_div(int, int);
