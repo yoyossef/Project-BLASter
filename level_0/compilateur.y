@@ -18,7 +18,13 @@
 }
 
 %token <string> ID
+%token <string> LIB
 %token <value> NUMBER
+%type <ast> include
+%type <ast> includes
+%type <ast> define
+%type <ast> defines
+%type <ast> main
 %type <ast> block
 %type <ast> instructions_list
 %type <ast> instruction
@@ -31,6 +37,7 @@
 %type <ast> arith_expr
 %type <ast> condition
 
+%token INCLUDE DEFINE MAIN RETURN
 %token INT
 %token GEQ LEQ
 %token EQUAL DIFF
@@ -46,7 +53,29 @@
 %%
 
 axiom:
-    block                       { parser_ast = $1; return 0; }
+    includes                { parser_ast = $1; return 0; }
+    ;
+
+includes:
+    include includes        { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | defines               { $$ = $1; }
+    ;
+
+include:
+    INCLUDE '<' LIB '>'     { $$ = ast_new_include($3); }
+    ;
+
+defines:
+    define defines          { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | main                  { $$ = $1; }
+    ;
+
+define:
+    DEFINE ID NUMBER        { $$ = ast_new_operation(AST_DEFINE, ast_new_id($2), ast_new_number($3)); }
+    ;
+
+main:
+    MAIN block              { $$ = ast_new_operation(AST_MAIN, $2, NULL); }
     ;
 
 block:
@@ -77,6 +106,7 @@ instruction:
     | WHILE '(' condition ')' block     { $$ = ast_new_operation(AST_WHILE, $3, $5); }
     | instruction_if                    { $$ = $1; }
     | instruction_if statement_elif     { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | RETURN arith_expr ';'             { $$ = ast_new_operation(AST_RETURN, $2, NULL); }
     ;
 
 instruction_if:
@@ -142,10 +172,10 @@ int main(int argc, char* argv[]) {
     printf("Entrez une expression :\n");
     
     if (yyparse() == 0) {
-        optimization_level_zero(parser_ast);
+        // optimization_level_zero(parser_ast);
         ast_print(parser_ast, 0);
-        printf("============================================\n");
-        ast_to_source(parser_ast, 0, 0);
+        // printf("============================================\n");
+        // ast_to_source(parser_ast, 0, 0);
     }
 
     // Be clean.

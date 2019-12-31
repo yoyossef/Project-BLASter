@@ -4,11 +4,18 @@
     #include "y.tab.h"
 %}
 
+lib             [a-z]+".h"
 identifier      [a-zA-Z_][0-9a-zA-Z_]*
-integer          ([1-9][0-9]*|[0-9])
+integer         ([1-9][0-9]*|[0-9])
 comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 %%
+
+"#include"      { return INCLUDE; }
+"#define"       { return DEFINE; }
+"int main(int argc, char *argv[])"      { return MAIN; }
+
+
 
 "int"           { return INT; }
 
@@ -18,10 +25,12 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 "while"         { return WHILE; }
 "else"          { return ELSE; }
 "for"           { return FOR; }
+"return"        { return RETURN; }
 
 
 
 {comment}       { }
+{lib}           { yylval.string = strdup(yytext); return LIB; }
 {identifier}    { yylval.string = strdup(yytext); return ID; }
 {integer}       { yylval.value = atoi(yytext); return NUMBER; }
 

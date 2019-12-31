@@ -25,6 +25,13 @@ ast* ast_new_id(char* id) {
     return new;
 }
 
+ast* ast_new_include(char* id) {
+    ast* new = malloc(sizeof(ast));
+    new->type = AST_INCLUDE;
+    new->id = id;
+    return new;
+}
+
 int are_identical(ast* T, ast* S) {
     if (T == NULL && S == NULL) 
         return 1; 
@@ -32,7 +39,7 @@ int are_identical(ast* T, ast* S) {
     if (T == NULL || S == NULL) 
         return 0; 
     
-    if ((T->type == AST_NUMBER || T->type == AST_ID) && (T->type == S->type)) 
+    if ((T->type == AST_NUMBER || T->type == AST_ID || T->type == AST_INCLUDE) && (T->type == S->type)) 
         return 1; 
 
     return (T->type == S->type && are_identical(T->left, S->left) && are_identical(T->right, S->right) ); 
@@ -78,7 +85,7 @@ ast* optimization_arithmetic_operation(ast* T) {
         free(string);
         return ast_new_id(new_nb_id);
     }
-    ast* resultat;
+    ast* resultat = NULL;
     ast* left = optimization_arithmetic_operation(T->left);
     ast* right = optimization_arithmetic_operation(T->right);
 
@@ -140,6 +147,9 @@ void ast_free(ast* ast) {
             case AST_ID:
                 free(ast->id);
                 break;
+            case AST_INCLUDE:
+                free(ast->id);
+                break;
             default:
                 ast_free(ast->left);
                 ast_free(ast->right);
@@ -157,6 +167,24 @@ void ast_print(ast* ast, int indent) {
     }
 
     switch(ast->type) {
+        case AST_INCLUDE:
+            printf("INCLUDE (%s)\n", ast->id);
+            break;
+        case AST_DEFINE:
+            printf("DEFINE\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_MAIN:
+            printf("MAIN\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_RETURN:
+            printf("RETURN\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
         case AST_ID:
             printf("ID (%s)\n", ast->id);
             break;
