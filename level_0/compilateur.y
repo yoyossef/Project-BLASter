@@ -141,8 +141,12 @@ int main(int argc, char* argv[]) {
     yyin = fopen(argv[1], "r");
     printf("Entrez une expression :\n");
     
-    if (yyparse() == 0)
+    if (yyparse() == 0) {
+        optimization_level_zero(parser_ast);
         ast_print(parser_ast, 0);
+        printf("============================================\n");
+        ast_to_source(parser_ast, 0, 0);
+    }
 
     // Be clean.
     lex_free();

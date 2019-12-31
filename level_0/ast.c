@@ -287,6 +287,7 @@ void ast_to_source(ast* ast, int indent, char is_for) {
     // Support of declaration/definition statements (e.g `int a = 3;`)
     if (ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
         && ast->right->type == AST_AFFECT) {
+        print_indent(new_indent);
         printf("int %s = ", ast->left->left->id);
         ast_to_source(ast->right->right, indent, is_for);
         printf(";\n");
@@ -299,7 +300,7 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             new_indent++;
             break;
         case AST_LIST:
-            if (!is_for)
+            if (!is_for && ast->left->type != AST_LIST)
                 print_indent(new_indent);
             break;
         case AST_ID:
@@ -322,7 +323,8 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             printf("else if (");
             break;
         case AST_ELSE:
-            printf("else");
+            print_indent(new_indent);
+            printf("else ");
             break;
         case AST_AFFECT:
             break;
@@ -402,6 +404,11 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             break;
     };
 
+    // Using is_for as a flag to distinct the last AST_AFFECT that
+    // don't have to output a semicolumn after it.
+    if (is_for == 1 && ast->type == AST_LIST)
+        is_for++;
+
     if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->right != NULL)
         ast_to_source(ast->right, new_indent, is_for);
 
@@ -412,7 +419,8 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             printf("}\n");
             break;
         case AST_AFFECT:
-            printf(";");
+            if (is_for < 2)
+                printf(";");
             if (!is_for)
                 printf("\n");
             break;
