@@ -134,7 +134,7 @@ void optimization_level_zero(ast* T) {
     }
 
     if (T->type == AST_RETURN) {
-         ast* tmp = optimization_arithmetic_operation(T->left);
+        ast* tmp = optimization_arithmetic_operation(T->left);
         ast_free(T->left);
         T->left = tmp;
         return;

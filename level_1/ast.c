@@ -239,12 +239,22 @@ void ast_to_source(ast* ast, int indent, char is_for) {
     }
 
     switch(ast->type) {
+        case AST_INCLUDE:
+            printf("#include <%s>\n", ast->id);
+            break;
+        case AST_DEFINE:
+            printf("#define ");
+            break;
+        case AST_MAIN:
+            printf("int main(int argc, char *argv[]) ");
+            break;
         case AST_BLOCK:
             printf("{\n");
             new_indent++;
             break;
         case AST_LIST:
-            if (!is_for && ast->left->type != AST_LIST)
+            if (!is_for && ast->left->type != AST_LIST &&
+            ast->type != AST_INCLUDE && ast->type != AST_DEFINE)
                 print_indent(new_indent);
             break;
         case AST_ID:
@@ -275,22 +285,36 @@ void ast_to_source(ast* ast, int indent, char is_for) {
         case AST_TYPE_INT:
             printf("int ");
             break;
+        case AST_TYPE_INT_VECT:
+            printf("int ");
+            break;
+        case AST_VECT_ITEM:
+            break;
+        case AST_RETURN:
+            printf("return ");
+            break;
         default:
             printf("(");
             break;
     };
 
-    if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
+    if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
         ast_to_source(ast->left, new_indent, is_for);
 
     // Adding the semicolumn after the for condition
     if (is_for && ast->type == AST_LIST && ast->left != NULL 
-        && ast->left->type >= 8 && ast->left->type <= 15)
+        && ast->left->type >= 13 && ast->left->type <= 20)
         printf(";");
 
     switch(ast->type) {
         case AST_TYPE_INT:
             printf(";\n");
+            break;
+        case AST_TYPE_INT_VECT:
+            printf("[");
+            break;
+        case AST_VECT_ITEM:
+            printf("[");
             break;
         case AST_ADD:
             printf("+");
@@ -344,6 +368,9 @@ void ast_to_source(ast* ast, int indent, char is_for) {
         case AST_ELSE_IF:
             printf(") ");
             break;
+        case AST_DEFINE:
+            printf(" ");
+            break;
         default:
             break;
     };
@@ -353,14 +380,18 @@ void ast_to_source(ast* ast, int indent, char is_for) {
     if (is_for == 1 && ast->type == AST_LIST)
         is_for++;
 
-    if (ast->type != AST_ID && ast->type != AST_NUMBER && ast->right != NULL)
+    if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER && ast->right != NULL)
         ast_to_source(ast->right, new_indent, is_for);
 
     switch (ast->type) {
-        case AST_BLOCK:
-            new_indent--;
-            print_indent(new_indent);
-            printf("}\n");
+        case AST_DEFINE:
+            printf("\n");
+        break;
+        case AST_TYPE_INT_VECT:
+            printf("];\n");
+            break;
+        case AST_VECT_ITEM:
+            printf("]");
             break;
         case AST_AFFECT:
             if (is_for < 2)
@@ -368,9 +399,17 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             if (!is_for)
                 printf("\n");
             break;
+        case AST_BLOCK:
+            new_indent--;
+            print_indent(new_indent);
+            printf("}\n");
+            break;
+        case AST_RETURN:
+            printf(";\n");
+            break;
         default:
             break;
     }
-    if ((ast->type >= 3 && ast->type <= 6) || (ast->type >= 8 && ast->type <= 15))
+    if ((ast->type >= 8 && ast->type <= 11) || (ast->type >= 13 && ast->type <= 20))
         printf(")");
 }
