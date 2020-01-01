@@ -3,6 +3,7 @@
     #include <stdlib.h>
     #include <string.h>
     #include "ast.h"
+    #include "optimizer.h"
 
     extern FILE* yyin;
     int yylex();
@@ -132,6 +133,10 @@ affectation:
         ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3));
         $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
     }
+    | ID '[' ID ']' '=' arith_expr   {
+        ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_id($3));
+        $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
+    }
     ;
 
 declaration:
@@ -148,6 +153,7 @@ arith_expr:
     | ID                            { $$ = ast_new_id($1); }
     | NUMBER                        { $$ = ast_new_number($1); }
     | ID '[' NUMBER ']'             { $$ = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3)); }
+    | ID '[' ID ']'                 { $$ = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_id($3)); }
     ;
 
 condition:
@@ -178,6 +184,7 @@ int main(int argc, char* argv[]) {
     printf("Entrez une expression :\n");
     
     if (yyparse() == 0) {
+        optimize_level_1(parser_ast);
         ast_print(parser_ast, 0);
     }
 

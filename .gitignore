@@ -6,4 +6,5 @@ main
 *a.out*
 *.DS_Store
 *test*
+*.vscode
 level_?/level_?*
