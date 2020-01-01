@@ -10,7 +10,7 @@ ast* replace_by_addition(ast* T) {
     ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->left->id));
     ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
     
-    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_ADD, vect_a, vect_b));
+    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_VECT_ADD, vect_a, vect_b));
 }
 
 ast* replace_by_scalar_product(ast* T) {

@@ -86,7 +86,7 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
-        case AST_OPT_FUN_ADD:
+        case AST_OPT_FUN_VECT_ADD:
             printf("VECTORS ADDITION\n");
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
