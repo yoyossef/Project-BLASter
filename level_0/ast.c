@@ -123,7 +123,7 @@ void optimization_level_zero(ast* T) {
     if (T == NULL) 
         return; 
 
-    if (T->type == AST_NUMBER || T->type == AST_ID) 
+    if (T->type == AST_NUMBER || T->type == AST_ID || T->type == AST_DEFINE) 
         return; 
 
     if (T->type == AST_AFFECT) {
@@ -133,6 +133,14 @@ void optimization_level_zero(ast* T) {
         return;
     }
 
+    if (T->type == AST_RETURN) {
+         ast* tmp = optimization_arithmetic_operation(T->left);
+        ast_free(T->left);
+        T->left = tmp;
+        return;
+    }
+
+    // To avoid treating the AFFECTs of the FOR
     if (T->type != AST_FOR)
         optimization_level_zero(T->left);
 
