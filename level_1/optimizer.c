@@ -6,19 +6,31 @@
 
 
 ast* replace_by_addition(ast* T) {
-    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
+    ast* l0 = ast_new_number(T->left->left->right->number);
+    ast* hi = ast_new_id(strdup(T->left->right->left->right->id));
     ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->left->id));
     ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
+    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
+
+    ast* tmp = ast_new_operation(AST_LIST, vect_b, vect_c);
+    tmp = ast_new_operation(AST_LIST, vect_a, tmp);
+    tmp = ast_new_operation(AST_LIST, hi, tmp);
     
-    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_VECT_ADD, vect_a, vect_b));
+    return ast_new_operation(AST_OPT_FUN_VECT_ADD, l0, tmp);
 }
 
 ast* replace_by_scalar_product(ast* T) {
-    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
+    ast* l0 = ast_new_number(T->left->left->right->number);
+    ast* hi = ast_new_id(strdup(T->left->right->left->right->id));
     ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->left->id));
     ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
+    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
+
+    ast* tmp = ast_new_operation(AST_LIST, vect_b, vect_c);
+    tmp = ast_new_operation(AST_LIST, vect_a, tmp);
+    tmp = ast_new_operation(AST_LIST, hi, tmp);
     
-    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_SC_PROD, vect_a, vect_b));
+    return ast_new_operation(AST_OPT_FUN_SC_PROD, l0, tmp);
 }
 
 void optimize(ast* T, ast* S, char operation) {
