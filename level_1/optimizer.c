@@ -6,8 +6,15 @@
 
 
 ast* replace_by_addition(ast* T) {
-    ast* l0 = ast_new_number(T->left->left->right->number);
-    ast* hi = ast_new_id(strdup(T->left->right->left->right->id));
+    char* i1 = T->right->left->left->right->left->right->id;
+    char* i2 = T->right->left->left->right->right->right->id;
+    char* i3 = T->right->left->left->left->right->id;
+    
+    if (strcmp(i1, i2) != 0 || strcmp(i1, i3) != 0)
+        return NULL;
+
+    ast* l0 = T->left->left->right;
+    ast* hi = T->left->right->left->right;
     ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->left->id));
     ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
     ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
@@ -16,12 +23,22 @@ ast* replace_by_addition(ast* T) {
     tmp = ast_new_operation(AST_LIST, vect_a, tmp);
     tmp = ast_new_operation(AST_LIST, hi, tmp);
     
+    T->left->left->right = NULL;
+    T->left->right->left->right = NULL;
+
     return ast_new_operation(AST_OPT_FUN_VECT_ADD, l0, tmp);
 }
 
 ast* replace_by_scalar_product(ast* T) {
-    ast* l0 = ast_new_number(T->left->left->right->number);
-    ast* hi = ast_new_id(strdup(T->left->right->left->right->id));
+    char* i1 = T->right->left->left->right->left->right->id;
+    char* i2 = T->right->left->left->right->right->right->id;
+    char* i3 = T->right->left->left->left->right->id;
+    
+    if (strcmp(i1, i2) != 0 || strcmp(i1, i3) != 0)
+        return NULL;
+
+    ast* l0 = T->left->left->right;
+    ast* hi = T->left->right->left->right;
     ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->left->id));
     ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
     ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
@@ -30,16 +47,38 @@ ast* replace_by_scalar_product(ast* T) {
     tmp = ast_new_operation(AST_LIST, vect_a, tmp);
     tmp = ast_new_operation(AST_LIST, hi, tmp);
     
+    T->left->left->right = NULL;
+    T->left->right->left->right = NULL;
+
     return ast_new_operation(AST_OPT_FUN_SC_PROD, l0, tmp);
 }
 
 ast* replace_by_axpy(ast* T) {
-    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
-    ast* scal_x = ast_new_id(strdup(T->right->left->left->right->left->left->id));
-    ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->right->left->id));
-    ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
+    char* y1 = T->right->left->left->left->left->id;
+    char* y2 = T->right->left->left->right->right->left->id;
+
+    char* i1 = T->right->left->left->right->right->right->id;
+    char* i2 = T->right->left->left->left->right->id;
+    char* i3 = T->right->left->left->right->left->right->right->id;
+
+    if (strcmp(y1, y2) != 0 || strcmp(i1, i2) != 0 || strcmp(i1, i3) != 0)
+        return NULL;
+
+    ast* l0 = T->left->left->right;
+    ast* hi = T->left->right->left->right;
+    ast* vect_y = ast_new_id(strdup(T->right->left->left->left->left->id));
+    ast* alpha = T->right->left->left->right->left->left;
+    ast* vect_x = ast_new_id(strdup(T->right->left->left->right->left->right->left->id));
+
+    ast* tmp = ast_new_operation(AST_LIST, vect_x, vect_y);
+    tmp = ast_new_operation(AST_LIST, alpha, tmp);
+    tmp = ast_new_operation(AST_LIST, hi, tmp);
     
-    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_AXPY, ast_new_operation(AST_LIST, scal_x, vect_a), vect_b));
+    T->left->left->right = NULL;
+    T->left->right->left->right = NULL;
+    T->right->left->left->right->left->left = NULL;
+    
+    return ast_new_operation(AST_OPT_FUN_AXPY, l0, tmp);
 }
 
 void optimize(ast* T, ast* S, char operation) {
@@ -61,18 +100,24 @@ void optimize(ast* T, ast* S, char operation) {
         {
             case '+':
                 tmp = replace_by_addition(T->left);
-                ast_free(T->left);
-                T->left = tmp;
+                if (tmp != NULL) {
+                    ast_free(T->left);
+                    T->left = tmp;
+                }
                 break;
             case '.':
                 tmp = replace_by_scalar_product(T->left);
-                ast_free(T->left);
-                T->left = tmp;
+                if (tmp != NULL) {
+                    ast_free(T->left);
+                    T->left = tmp;
+                }
                 break;
             case 'g':
                 tmp = replace_by_axpy(T->left);
-                ast_free(T->left);
-                T->left = tmp;
+                if (tmp != NULL) {
+                    ast_free(T->left);
+                    T->left = tmp;
+                }
                 break;
             default:
                 break;

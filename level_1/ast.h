@@ -13,6 +13,7 @@ typedef enum ast_type {
     AST_IF, AST_ELSE_IF, AST_ELSE, 
     AST_LIST, AST_BLOCK, AST_RETURN,
     AST_OPT_FUN_VECT_ADD, AST_OPT_FUN_SC_PROD, AST_OPT_FUN_AXPY,
+    AST_ARITH_OP
 } ast_type;
 
 typedef struct ast {

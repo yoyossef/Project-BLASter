@@ -32,12 +32,28 @@ ast* ast_new_include(char* id) {
     return new;
 }
 
+int is_aithmetic_operation(ast* T) {
+    if (T == NULL)
+        return 0;
+    if (T->type == AST_INCLUDE) 
+        return 0; 
+    if (T->type == AST_NUMBER || T->type == AST_ID) 
+        return 1; 
+    if (T->type == AST_ADD || T->type == AST_SUB || T->type == AST_MUL || T->type == AST_DIV) 
+        return is_aithmetic_operation(T->left) || is_aithmetic_operation(T->right); 
+
+    return 0;
+}
+
 int are_identical(ast* T, ast* S) {
     if (T == NULL && S == NULL) 
         return 1; 
   
     if (T == NULL || S == NULL) 
         return 0; 
+    
+    if (S->type == AST_ARITH_OP) 
+        return is_aithmetic_operation(T); 
     
     if ((T->type == AST_NUMBER || T->type == AST_ID || T->type == AST_INCLUDE) && (T->type == S->type)) 
         return 1; 
@@ -93,6 +109,11 @@ void ast_print(ast* ast, int indent) {
             break;
         case AST_OPT_FUN_SC_PROD:
             printf("SCALAR PRODUCT\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_OPT_FUN_AXPY:
+            printf("VECTOR AXPY\n");
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
@@ -222,9 +243,6 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             break;
         default:
-            printf("opt function\n");
-            ast_print(ast->left, indent + 1);
-            ast_print(ast->right, indent + 1);
             break;
     };
 }
