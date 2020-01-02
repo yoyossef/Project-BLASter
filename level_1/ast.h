@@ -12,7 +12,7 @@ typedef enum ast_type {
     AST_FOR, AST_WHILE, 
     AST_IF, AST_ELSE_IF, AST_ELSE, 
     AST_LIST, AST_BLOCK, AST_RETURN,
-    AST_OPT_FUN_VECT_ADD, AST_OPT_FUN_SC_PROD
+    AST_OPT_FUN_VECT_ADD, AST_OPT_FUN_SC_PROD, AST_OPT_FUN_AXPY,
 } ast_type;
 
 typedef struct ast {

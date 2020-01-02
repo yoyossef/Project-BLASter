@@ -33,6 +33,15 @@ ast* replace_by_scalar_product(ast* T) {
     return ast_new_operation(AST_OPT_FUN_SC_PROD, l0, tmp);
 }
 
+ast* replace_by_axpy(ast* T) {
+    ast* vect_c = ast_new_id(strdup(T->right->left->left->left->left->id));
+    ast* scal_x = ast_new_id(strdup(T->right->left->left->right->left->left->id));
+    ast* vect_a = ast_new_id(strdup(T->right->left->left->right->left->right->left->id));
+    ast* vect_b = ast_new_id(strdup(T->right->left->left->right->right->left->id));
+    
+    return ast_new_operation(AST_AFFECT, vect_c, ast_new_operation(AST_OPT_FUN_AXPY, ast_new_operation(AST_LIST, scal_x, vect_a), vect_b));
+}
+
 void optimize(ast* T, ast* S, char operation) {
     if (S == NULL)
         return ; 
@@ -60,6 +69,11 @@ void optimize(ast* T, ast* S, char operation) {
                 ast_free(T->left);
                 T->left = tmp;
                 break;
+            case 'g':
+                tmp = replace_by_axpy(T->left);
+                ast_free(T->left);
+                T->left = tmp;
+                break;
             default:
                 break;
         }
@@ -81,7 +95,15 @@ void optimize_scalar_product(ast* T) {
     ast_free(scalar_product_ast);
 }
 
+void optimize_axpy(ast* T) {
+    ast* axpy_ast = get_axpy_ast();
+    optimize(T, axpy_ast, 'g');
+
+    ast_free(axpy_ast);
+}
+
 void optimize_level_1(ast* T) {
     optimize_addition(T);
     optimize_scalar_product(T);
+    optimize_axpy(T);
 }

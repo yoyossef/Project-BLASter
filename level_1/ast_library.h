@@ -6,5 +6,6 @@
 
 ast* get_addition_ast();
 ast* get_scalar_product_ast();
+ast* get_axpy_ast();
 
 #endif
