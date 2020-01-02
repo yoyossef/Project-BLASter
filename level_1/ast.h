@@ -37,6 +37,7 @@ ast** is_subtree(ast*, ast*, ast**, int*);
 void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);
+void ast_parse_opt_fun(ast*);
 void ast_to_source(ast*, int, char);
 
 #endif

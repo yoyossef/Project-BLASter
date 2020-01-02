@@ -254,6 +254,42 @@ void print_indent(int indent) {
         printf("\t");
 }
 
+void ast_parse_opt_fun(ast* T) {
+    if (T == NULL)
+        return;
+    switch(T->type) {
+        case AST_OPT_FUN_VECT_ADD:
+            printf("opt_vect_add(");
+            ast_parse_opt_fun(T->left);
+            printf(", ");
+            ast_parse_opt_fun(T->right);
+            printf(")");
+            break;
+        case AST_OPT_FUN_SC_PROD:
+            printf("opt_sc_prod(");
+            ast_parse_opt_fun(T->left);
+            printf(", ");
+            ast_parse_opt_fun(T->right);
+            printf(")");
+            break;
+        case AST_OPT_FUN_AXPY:
+            printf("opt_vect_axpy(");
+            ast_parse_opt_fun(T->left);
+            printf(", ");
+            ast_parse_opt_fun(T->right);
+            printf(")");
+            break;
+        case AST_LIST:
+            ast_parse_opt_fun(T->left);
+            printf(", ");
+            ast_parse_opt_fun(T->right);
+            break;
+        default:
+            ast_to_source(T, 0, 0);
+            break;
+    }
+}
+
 void ast_to_source(ast* ast, int indent, char is_for) {
     int new_indent = indent;
     // Support of declaration/definition statements (e.g `int a = 3;`)
@@ -281,8 +317,7 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             new_indent++;
             break;
         case AST_LIST:
-            if (!is_for && ast->left->type != AST_LIST &&
-            ast->type != AST_INCLUDE && ast->type != AST_DEFINE)
+            if (!is_for && ast->left->type != AST_LIST)
                 print_indent(new_indent);
             break;
         case AST_ID:
@@ -320,6 +355,18 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             break;
         case AST_RETURN:
             printf("return ");
+            break;
+        case AST_OPT_FUN_VECT_ADD:
+            ast_parse_opt_fun(ast);
+            return;
+            break;
+        case AST_OPT_FUN_SC_PROD:
+            ast_parse_opt_fun(ast);
+            return;
+            break;
+        case AST_OPT_FUN_AXPY:
+            ast_parse_opt_fun(ast);
+            return;
             break;
         default:
             printf("(");
