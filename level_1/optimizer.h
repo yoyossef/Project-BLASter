@@ -4,6 +4,8 @@
 #include "ast.h"
 
 void optimize_level_1(ast*);
+void optimize_set(ast*);
+void optimize_swap(ast*);
 void optimize_addition(ast*);
 void optimize_scalar_product(ast*);
 

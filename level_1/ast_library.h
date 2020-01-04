@@ -4,6 +4,8 @@
 
 #include "ast.h"
 
+ast* get_set_ast();
+ast* get_swap_ast();
 ast* get_addition_ast();
 ast* get_scalar_product_ast();
 ast* get_axpy_ast();
