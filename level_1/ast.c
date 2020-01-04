@@ -168,6 +168,11 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
+        case AST_INCREMENT:
+            printf("++\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
         case AST_EQUAL:
             printf("==\n");
             ast_print(ast->left, indent + 1);

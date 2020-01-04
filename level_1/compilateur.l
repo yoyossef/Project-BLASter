@@ -42,13 +42,14 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 "<="            { return LEQ; }
 "&&"            { return AND; }
 "||"            { return OR; }
+"++"            { return INCREMENT; }
 
 
 
 [=+\-\*/()<>\[\]]       { return yytext[0]; }  
-[{},;]              { return yytext[0]; }  
-[\n\t ]             { }  
-.                   { printf("Caractere inconnu: %s", yytext); }
+[{},;]                  { return yytext[0]; }  
+[\n\t ]                 { }  
+.                       { printf("Caractere inconnu: %s", yytext); }
 
 %%
 

@@ -9,8 +9,7 @@ ast* get_addition_ast() {
 
     ast* init = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
     ast* condition = ast_new_operation(AST_INF, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
-    tmp = ast_new_operation(AST_ADD, ast_new_id(strdup("i")), ast_new_number(1));
-    ast* increment = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), tmp);
+    ast* increment = ast_new_operation(AST_INCREMENT, ast_new_id("i"), ast_new_number(1));
     tmp = ast_new_operation(AST_LIST, condition, increment);
     ast* init_for = ast_new_operation(AST_LIST, init, tmp);
 
@@ -30,8 +29,7 @@ ast* get_scalar_product_ast() {
 
     ast* init = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
     ast* condition = ast_new_operation(AST_INF, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
-    tmp = ast_new_operation(AST_ADD, ast_new_id(strdup("i")), ast_new_number(1));
-    ast* increment = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), tmp);
+    ast* increment = ast_new_operation(AST_INCREMENT, ast_new_id("i"), ast_new_number(1));
     tmp = ast_new_operation(AST_LIST, condition, increment);
     ast* init_for = ast_new_operation(AST_LIST, init, tmp);
 
@@ -51,8 +49,7 @@ ast* get_axpy_ast() {
 
     ast* init = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
     ast* condition = ast_new_operation(AST_INF, ast_new_id(strdup("i")), ast_new_operation(AST_ARITH_OP, NULL, NULL));
-    tmp = ast_new_operation(AST_ADD, ast_new_id(strdup("i")), ast_new_number(1));
-    ast* increment = ast_new_operation(AST_AFFECT, ast_new_id(strdup("i")), tmp);
+    ast* increment = ast_new_operation(AST_INCREMENT, ast_new_id("i"), ast_new_number(1));
     tmp = ast_new_operation(AST_LIST, condition, increment);
     ast* init_for = ast_new_operation(AST_LIST, init, tmp);
 

@@ -40,6 +40,7 @@
 
 %token INCLUDE DEFINE MAIN RETURN
 %token INT
+%token INCREMENT
 %token GEQ LEQ
 %token EQUAL DIFF
 %token AND OR
@@ -129,6 +130,7 @@ instruction_else:
 
 affectation:
     ID '=' arith_expr   { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
+    | ID INCREMENT      { $$ = ast_new_operation(AST_INCREMENT, ast_new_id($1), ast_new_number(1)); }
     | ID '[' NUMBER ']' '=' arith_expr   {
         ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3));
         $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
