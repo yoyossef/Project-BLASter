@@ -102,6 +102,11 @@ void ast_print(ast* ast, int indent) {
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;
+        case AST_FUN:
+            printf("FUN\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
         case AST_RETURN:
             printf("RETURN\n");
             ast_print(ast->left, indent + 1);

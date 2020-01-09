@@ -26,6 +26,9 @@
 %type <ast> define
 %type <ast> defines
 %type <ast> main
+%type <ast> function
+%type <ast> functions
+%type <ast> arguments
 %type <ast> block
 %type <ast> instructions_list
 %type <ast> instruction
@@ -39,7 +42,7 @@
 %type <ast> condition
 
 %token INCLUDE DEFINE MAIN RETURN
-%token INT
+%token VOID INT
 %token INCREMENT
 %token GEQ LEQ
 %token EQUAL DIFF
@@ -70,10 +73,32 @@ include:
 defines:
     define defines          { $$ = ast_new_operation(AST_LIST, $1, $2); }
     | main                  { $$ = $1; }
+    | functions             { $$ = $1; }
     ;
 
 define:
     DEFINE ID NUMBER        { $$ = ast_new_operation(AST_DEFINE, ast_new_id($2), ast_new_number($3)); }
+    ;
+
+functions:
+    function functions      { $$ = ast_new_operation(AST_LIST, $1, $2); }
+    | function              { $$ = $1; }
+    ;
+
+function:
+    VOID ID '('  ')' block              { 
+        ast* tmp = ast_new_operation(AST_LIST, ast_new_id($2), NULL);
+        $$ = ast_new_operation(AST_FUN, tmp, $5); 
+    }
+    | VOID ID '(' arguments ')' block   { 
+        ast* tmp = ast_new_operation(AST_LIST, ast_new_id($2), $4);
+        $$ = ast_new_operation(AST_FUN, tmp, $6); 
+    }
+    ;
+
+arguments:
+    ID ',' arguments        { $$ = ast_new_operation(AST_LIST, ast_new_id($1), $3); }
+    | ID                    { $$ = ast_new_id($1); }
     ;
 
 main:

@@ -18,6 +18,7 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 
 "int"           { return INT; }
+"void"          { return VOID; }
 
 
 
