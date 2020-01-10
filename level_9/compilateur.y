@@ -4,6 +4,7 @@
     #include <string.h>
     #include "ast.h"
     #include "symbol.h"
+    #include "optimizer.h"
 
     extern FILE* yyin;
     int yylex();
@@ -204,23 +205,46 @@ void yyerror(char* msg) {
 
 int main(int argc, char* argv[]) {
     struct symbol* symbol_table = NULL;
+    struct ast* souce_code = NULL;
+    struct ast* library = NULL;
 
     if (argc < 2)
         exit(1);
 
     yyin = fopen(argv[1], "r");
-    printf("Entrez une expression :\n");
+    
+    // Code Source
+    if (yyparse() == 0) {
+        // ast_print(parser_ast, 0);
+        souce_code = parser_ast;
+        symbol_build_table(souce_code, &symbol_table);
+        // symbol_print(symbol_table);
+    }
+    fclose(yyin);
+
+    // Biblitheque Connue
+    yyin = fopen(argv[2], "r");
     
     if (yyparse() == 0) {
-        ast_print(parser_ast, 0);
-
-        symbol_build_table(parser_ast, &symbol_table);
-        symbol_print(symbol_table);
+        // ast_print(parser_ast, 0);
+        library = parser_ast;
     }
+
+    // if (are_identical(souce_code->right, library->right))
+    //     printf("are_identical\n");
+
+    // if (arguments_are_repleable(library->left->right, souce_code->right, library->right, symbol_table))
+    //     printf("OK replaceable\n");
+    // else
+    //     printf("NOPE\n");
+
+    optimize(souce_code, library, symbol_table);
+    ast_print(souce_code, 0);
 
     // Be clean.
     lex_free();
-    ast_free(parser_ast);
+    ast_free(souce_code);
+    ast_free(library);
     symbol_free(symbol_table);
     fclose(yyin);
     

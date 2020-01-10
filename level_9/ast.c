@@ -52,9 +52,6 @@ int are_identical(ast* T, ast* S) {
     if (T == NULL || S == NULL) 
         return 0; 
     
-    // if (S->type == AST_ARITH_OP) 
-    //     return is_aithmetic_operation(T); 
-    
     if ((T->type == AST_NUMBER || T->type == AST_ID || T->type == AST_INCLUDE) && (T->type == S->type)) 
         return 1; 
 

@@ -1,3 +1,4 @@
+#include <string.h>
 #include "symbol.h"
 
 
@@ -78,7 +79,7 @@ void symbol_build_table(struct ast* ast, struct symbol** symbol_table) {
         case AST_ID:
             tmp = symbol_lookup(*symbol_table, ast->id);
             if (tmp == NULL) {
-                symbol_add(symbol_table, ast->id);
+                symbol_add(symbol_table, strdup(ast->id));
             }
             break;
         default:

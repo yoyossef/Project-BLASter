@@ -10,10 +10,10 @@ ifeq ($(UNAME_S),Darwin)
     CCFLAGS += -ll -ly
 endif
 
-all: $(PREFIX).y $(PREFIX).l ast.c ast.h symbol.c symbol.h
+all: $(PREFIX).y $(PREFIX).l ast.c ast.h symbol.c symbol.h optimizer.c optimizer.h
 	yacc -d $(PREFIX).y
 	lex $(PREFIX).l
-	gcc y.tab.c lex.yy.c ast.c symbol.c $(CCFLAGS)
+	gcc y.tab.c lex.yy.c ast.c symbol.c optimizer.c $(CCFLAGS)
 
 clean:
 	rm *.o y.tab.c y.tab.h lex.yy.c a.out $(EXEC)
