@@ -205,7 +205,7 @@ void yyerror(char* msg) {
 
 int main(int argc, char* argv[]) {
     struct symbol* symbol_table = NULL;
-    struct ast* souce_code = NULL;
+    struct ast* source_code = NULL;
     struct ast* library = NULL;
 
     if (argc < 2)
@@ -215,8 +215,8 @@ int main(int argc, char* argv[]) {
     
     // Code Source
     if (yyparse() == 0) {
-        souce_code = parser_ast;
-        symbol_build_table(souce_code, &symbol_table);
+        source_code = parser_ast;
+        symbol_build_table(source_code, &symbol_table);
     }
     fclose(yyin);
 
@@ -228,14 +228,14 @@ int main(int argc, char* argv[]) {
     }
 
     // Optimisation
-    optimize(souce_code, library, symbol_table);
-
+    optimize(source_code, library, symbol_table);
+    
     // Affichage du resultat
-    ast_print(souce_code, 0);
+    ast_print(source_code, 0);
 
     // Be clean.
     lex_free();
-    ast_free(souce_code);
+    ast_free(source_code);
     ast_free(library);
     symbol_free(symbol_table);
     fclose(yyin);
