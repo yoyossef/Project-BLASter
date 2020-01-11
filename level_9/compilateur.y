@@ -232,7 +232,9 @@ int main(int argc, char* argv[]) {
     
     // Affichage du resultat
     ast_print(source_code, 0);
-
+    print_include(library);
+    ast_to_source(source_code, 0, 0);
+    
     // Be clean.
     lex_free();
     ast_free(source_code);

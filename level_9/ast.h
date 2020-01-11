@@ -36,4 +36,19 @@ void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);
 
+/**
+ * @brief Prints the includes of a lib
+ */
+void print_include(ast*);
+
+/**
+ * @brief Parses a function call AST and prints it w/ arguments
+ */
+void ast_parse_opt_fun(ast*);
+
+/**
+ * @brief Parses an AST and prints the code w/ indents
+ */
+void ast_to_source(ast*, int, char);
+
 #endif

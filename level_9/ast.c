@@ -272,3 +272,248 @@ void print_indent(int indent) {
     for (int i = 0; i < indent; i++)
         printf("\t");
 }
+
+void print_include(ast* T){
+    if (T == NULL)
+        return;
+
+    switch (T->type) {
+        case AST_INCLUDE:
+            printf("#include <%s>\n", T->id);
+            return;
+            break;
+        case AST_LIST:
+            break;
+        default:
+            return;
+            break;
+    }
+    print_include(T->left);
+    print_include(T->right);
+}
+
+void ast_parse_opt_fun(ast* T) {
+    if (T == NULL)
+        return;
+    switch(T->type) {
+        case AST_FUN:
+            printf("%s(", T->left->id);
+            ast_parse_opt_fun(T->right);
+            printf(");\n");
+            break;
+        case AST_LIST:
+            ast_parse_opt_fun(T->left);
+            printf(", ");
+            ast_parse_opt_fun(T->right);
+            break;
+        default:
+            ast_to_source(T, 0, 0);
+            break;
+    }
+}
+
+void ast_to_source(ast* ast, int indent, char is_for) {
+    int new_indent = indent;
+    // Support of declaration/definition statements (e.g `int a = 3;`)
+    if (ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
+        && ast->right->type == AST_AFFECT) {
+        print_indent(new_indent);
+        printf("int %s = ", ast->left->left->id);
+        ast_to_source(ast->right->right, indent, is_for);
+        printf(";\n");
+        return;
+    }
+
+    switch(ast->type) {
+        case AST_INCLUDE:
+            printf("#include <%s>\n", ast->id);
+            break;
+        case AST_DEFINE:
+            printf("#define ");
+            break;
+        case AST_MAIN:
+            printf("int main(int argc, char *argv[]) ");
+            break;
+        case AST_FUN:
+            ast_parse_opt_fun(ast);
+            return;
+            break;
+        case AST_ID:
+            printf("%s", ast->id);
+            break;
+        case AST_NUMBER:
+            printf("%d", ast->number);
+            break;
+        case AST_TYPE_INT:
+            printf("int ");
+            break;
+        case AST_TYPE_INT_VECT:
+            printf("int ");
+            break;
+        case AST_VECT_ITEM:
+            break;
+        case AST_AFFECT:
+            break;
+        case AST_INCREMENT:
+            break;
+        case AST_FOR:
+            is_for = 1;
+            printf("for (");
+            break;
+        case AST_WHILE:
+            printf("while (");
+            break;
+        case AST_IF:
+            printf("if (");
+            break;
+        case AST_ELSE_IF:
+            printf("else if (");
+            break;
+        case AST_ELSE:
+            print_indent(new_indent);
+            printf("else ");
+            break;
+        case AST_LIST:
+            if (!is_for && ast->left->type != AST_LIST)
+                print_indent(new_indent);
+            break;
+        case AST_BLOCK:
+            printf("{\n");
+            new_indent++;
+            break;
+        case AST_RETURN:
+            printf("return ");
+            break;
+        default:
+            printf("(");
+            break;
+    };
+
+    if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
+        ast_to_source(ast->left, new_indent, is_for);
+
+    // Adding the semicolumn after the for condition
+    if (is_for && ast->type == AST_LIST && ast->left != NULL 
+        && ast->left->type >= 15 && ast->left->type <= 22)
+        printf(";");
+
+    switch(ast->type) {
+        case AST_TYPE_INT:
+            printf(";\n");
+            break;
+        case AST_TYPE_INT_VECT:
+            printf("[");
+            break;
+        case AST_VECT_ITEM:
+            printf("[");
+            break;
+        case AST_ADD:
+            printf("+");
+            break;
+        case AST_SUB:
+            printf("-");
+            break;
+        case AST_MUL:
+            printf("*");
+            break;
+        case AST_DIV:
+            printf("/");
+            break;
+        case AST_AFFECT:
+            printf("=");
+            break;
+        case AST_INCREMENT:
+            if (ast->right->number == 1)
+                printf("++");
+            else
+                printf("+= %d", ast->right->number);
+            break;
+        case AST_AND:
+            printf("&&");
+            break;
+        case AST_OR:
+            printf("||");
+            break;
+        case AST_EQUAL:
+            printf("==");
+            break;
+        case AST_DIFF:
+            printf("!=");
+            break;
+        case AST_GEQ:
+            printf(">=");
+            break;
+        case AST_LEQ:
+            printf("<=");
+            break;
+        case AST_SUP:
+            printf(">");
+            break;
+        case AST_INF:
+            printf("<");
+            break;
+        case AST_FOR:
+            printf(") ");
+            is_for = 0;
+            break;
+        case AST_WHILE:
+            printf(") ");
+            break;
+        case AST_IF:
+            printf(") ");
+            break;
+        case AST_ELSE_IF:
+            printf(") ");
+            break;
+        case AST_DEFINE:
+            printf(" ");
+            break;
+        default:
+            break;
+    };
+
+    // Using is_for as a flag to distinct the last AST_AFFECT that
+    // don't have to output a semicolumn after it.
+    if (is_for == 1 && ast->type == AST_LIST)
+        is_for++;
+
+    if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER
+    && ast->type != AST_INCREMENT && ast->right != NULL)
+        ast_to_source(ast->right, new_indent, is_for);
+
+    switch (ast->type) {
+        case AST_DEFINE:
+            printf("\n");
+        break;
+        case AST_TYPE_INT_VECT:
+            printf("];\n");
+            break;
+        case AST_VECT_ITEM:
+            printf("]");
+            break;
+        case AST_AFFECT:
+            if (is_for < 2)
+                printf(";");
+            if (!is_for)
+                printf("\n");
+            break;
+        case AST_INCREMENT:
+            if (is_for < 2)
+                printf(";");
+            if (!is_for)
+                printf("\n");
+            break;
+        case AST_BLOCK:
+            new_indent--;
+            print_indent(new_indent);
+            printf("}\n");
+            break;
+        case AST_RETURN:
+            printf(";\n");
+            break;
+        default:
+            break;
+    }
+    if ((ast->type >= 9 && ast->type <= 12) || (ast->type >= 15 && ast->type <= 22))
+        printf(")");
+}
