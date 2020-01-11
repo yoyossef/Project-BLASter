@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include <getopt.h>
     #include "ast.h"
     #include "symbol.h"
     #include "optimizer.h"
@@ -199,19 +200,78 @@ condition:
 %%
 
 void yyerror(char* msg) {
-    printf("syntax error: %s\n", msg);
+    fprintf(stderr,"syntax error: %s\n", msg);
     exit(1);
 }
 
+void print_usage() {
+	fprintf(stderr, "usage: blaster [-v, --version] [-t, --tos] [-a, --ast] [-o dest_file] source_file spec_file\n");
+	fprintf(stderr,
+        "\tsource_file: the file of the program to optimize\n\
+        spec_file: the file describing the functions to recognize\n\
+        -o dest_file: to specify the output file (default file is output.c)\n");
+	exit(1);
+}
+
+void print_version() {
+    printf("blaster v1.0 (Jan 2020)\nTeam Buffalo (M1 SIL, Université de Strasbourg): \n\t\
+    - ROSTAQI Yossef\n\t\
+    - BEFOLE Benjamin\n\t\
+    - ELHADDAD Hamza\n\t\
+    - CHERGUI MALIH Ilyes\n");
+    exit(0);
+}
+
 int main(int argc, char* argv[]) {
+    int tos_flag = 0, ast_flag = 0, output_flag = 0;
+    int next_option;
+	const char* const short_options = "vtao:";
+
+    static struct option long_options[] = {
+        {"version",      no_argument,       NULL,  'v' },
+        {"tos",          no_argument,       NULL,  't' },
+        {"ast",          no_argument,       NULL,  'a' },
+        {"output",       required_argument, NULL,  'o' },
+        {NULL,              0,              NULL,  0   }
+    };
+
+    // const char* output_filename = NULL;
+
+    do {
+        next_option = getopt_long (argc, argv, short_options, long_options, NULL);
+
+        switch (next_option) {
+            case 'v':
+                print_version();
+            case 't':
+                tos_flag=1;
+                break;
+            case 'a':
+                ast_flag=1;
+                break;
+            case 'o':
+                output_flag=1;
+                // output_filename = optarg;
+                break;
+            case '?':
+                print_usage();
+            case -1:
+                break;
+            default:
+                print_usage();
+                break;
+        }
+    }
+    while(next_option != -1);
+
     struct symbol* symbol_table = NULL;
     struct ast* source_code = NULL;
     struct ast* library = NULL;
 
-    if (argc < 2)
-        exit(1);
+    if (argc < 3)
+        print_usage();
 
-    yyin = fopen(argv[1], "r");
+    yyin = fopen(argv[optind], "r");
     
     // Code Source
     if (yyparse() == 0) {
@@ -220,8 +280,17 @@ int main(int argc, char* argv[]) {
     }
     fclose(yyin);
 
+    if (ast_flag){
+        printf("=====AST BEFORE=====\n");
+        ast_print(source_code, 0);
+    }
+    if (tos_flag) {
+        printf("=====TABLE OF SYMBOLS=====\n");
+        symbol_print(symbol_table);
+    }
+
     // Biblitheque Connue
-    yyin = fopen(argv[2], "r");
+    yyin = fopen(argv[optind + 1], "r");
     
     if (yyparse() == 0) {
         library = parser_ast;
@@ -231,7 +300,10 @@ int main(int argc, char* argv[]) {
     optimize(source_code, library, symbol_table);
     
     // Affichage du resultat
-    ast_print(source_code, 0);
+    if (ast_flag){
+        printf("=====AST AFTER=====\n");
+        ast_print(source_code, 0);
+    }
     print_include(library);
     ast_to_source(source_code, 0, 0);
     
