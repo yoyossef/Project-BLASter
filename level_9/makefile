@@ -1,5 +1,5 @@
 
-EXEC=level_9
+EXEC=blaster
 PREFIX=compilateur
 CCFLAGS= -Wall -o $(EXEC) -g
 UNAME_S := $(shell uname -s)

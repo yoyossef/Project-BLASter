@@ -234,7 +234,7 @@ void print_usage() {
 }
 
 void print_version() {
-    printf("blaster v1.0 (Jan 2020)\nTeam Buffalo (M1 SIL, Université de Strasbourg): \n\t\
+    printf("blaster v1.0 (Jan 2020)\nTeam Buffalo (M1 SIL 2019-2020, Université de Strasbourg): \n\t\
     - ROSTAQI Yossef\n\t\
     - BEFOLE Benjamin\n\t\
     - ELHADDAD Hamza\n\t\
