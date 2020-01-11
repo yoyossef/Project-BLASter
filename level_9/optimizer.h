@@ -10,8 +10,8 @@ typedef struct opt_symbol {
 } opt_symbol;
 
 int variable_is_replaceable(char* variable, ast* source, ast* function, symbol* table);
-int variables_are_replaceable(ast* variables, ast* source, ast* function, symbol* table);
-char* get_argument(char* argument, ast* source, ast* function);
+int variables_are_replaceable(ast* source, ast* function, symbol* table);
+ast* get_argument(char* argument, ast* source, ast* function);
 ast* replace(ast* source, ast* function);
 void optimize(ast* source, ast* library, symbol* table);
 

@@ -215,10 +215,8 @@ int main(int argc, char* argv[]) {
     
     // Code Source
     if (yyparse() == 0) {
-        // ast_print(parser_ast, 0);
         souce_code = parser_ast;
         symbol_build_table(souce_code, &symbol_table);
-        // symbol_print(symbol_table);
     }
     fclose(yyin);
 
@@ -226,19 +224,13 @@ int main(int argc, char* argv[]) {
     yyin = fopen(argv[2], "r");
     
     if (yyparse() == 0) {
-        // ast_print(parser_ast, 0);
         library = parser_ast;
     }
 
-    // if (are_identical(souce_code->right, library->right))
-    //     printf("are_identical\n");
-
-    // if (arguments_are_repleable(library->left->right, souce_code->right, library->right, symbol_table))
-    //     printf("OK replaceable\n");
-    // else
-    //     printf("NOPE\n");
-
+    // Optimisation
     optimize(souce_code, library, symbol_table);
+
+    // Affichage du resultat
     ast_print(souce_code, 0);
 
     // Be clean.

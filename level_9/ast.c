@@ -32,20 +32,44 @@ ast* ast_new_include(char* id) {
     return new;
 }
 
-int is_aithmetic_operation(ast* T) {
+ast* ast_copy(ast* T) {
+    ast* result = NULL;
+    if (T == NULL)
+        return NULL;
+
+    switch (T->type)
+    {
+        case AST_NUMBER:
+            result = ast_new_number(T->number);
+            break;
+        case AST_ID:
+            result = ast_new_id(strdup(T->id));
+            break;
+        case AST_INCLUDE:
+            result = ast_new_include(strdup(T->id));
+            break;
+        default:
+            result = ast_new_operation(T->type, ast_copy(T->left), ast_copy(T->right));
+            break;
+    }
+
+    return result;
+}
+
+int is_arithmetic_operation(ast* T) {
     if (T == NULL)
         return 0;
-    if (T->type == AST_INCLUDE) 
+    if (T->type == AST_INCLUDE || T->type == AST_VECT_ITEM) 
         return 0; 
     if (T->type == AST_NUMBER || T->type == AST_ID) 
         return 1; 
     if (T->type == AST_ADD || T->type == AST_SUB || T->type == AST_MUL || T->type == AST_DIV) 
-        return is_aithmetic_operation(T->left) || is_aithmetic_operation(T->right); 
+        return is_arithmetic_operation(T->left) && is_arithmetic_operation(T->right); 
 
     return 0;
 }
 
-int are_identical(ast* T, ast* S) {
+int are_similar(ast* T, ast* S) {
     if (T == NULL && S == NULL) 
         return 1; 
   
@@ -54,8 +78,11 @@ int are_identical(ast* T, ast* S) {
     
     if ((T->type == AST_NUMBER || T->type == AST_ID || T->type == AST_INCLUDE) && (T->type == S->type)) 
         return 1; 
+    
+    if (S->type == AST_ID) 
+        return is_arithmetic_operation(T);
 
-    return (T->type == S->type && are_identical(T->left, S->left) && are_identical(T->right, S->right) ); 
+    return (T->type == S->type && are_similar(T->left, S->left) && are_similar(T->right, S->right) ); 
 }
 
 void ast_free(ast* ast) {

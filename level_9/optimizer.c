@@ -4,75 +4,75 @@
 #include "optimizer.h"  
 
 
-void variable_is_replaceable_private(char* argument, ast* source, ast* function, symbol* table, opt_symbol* reference) {
+void variable_is_replaceable_private(char* variable, ast* source, ast* function, symbol* table, opt_symbol* reference) {
     symbol* tmp;
 
     if (!reference->is_same_symbol || source == NULL || function == NULL)
         return;
 
-    switch (source->type)
-    {
-        case AST_NUMBER:
-            break;
-        case AST_INCLUDE:
-            break;
-        case AST_ID:
-            if (strcmp(argument, function->id) == 0) {
-                tmp = symbol_lookup(table, source->id);
-                if (reference->symbol != NULL && tmp != reference->symbol) {
-                    reference->is_same_symbol =0;
-                    reference->symbol = NULL;
-                    return;
-                }
-                reference->symbol = tmp;
+    if (source->type == AST_NUMBER || source->type == AST_INCLUDE)
+        return;
+    
+    if (function->type == AST_ID) {
+        if (strcmp(variable, function->id) == 0) {
+            tmp = symbol_lookup(table, source->id);
+            if (reference->symbol != NULL && tmp != reference->symbol) {
+                reference->is_same_symbol =0;
+                reference->symbol = NULL;
+                return;
             }
-            break;
-        default:
-            variable_is_replaceable_private(argument, source->left, function->left, table, reference);
-            variable_is_replaceable_private(argument, source->right, function->right, table, reference);
-            break;
+            reference->symbol = tmp;
+        }
+        return;
     }
+
+    variable_is_replaceable_private(variable, source->left, function->left, table, reference);
+    variable_is_replaceable_private(variable, source->right, function->right, table, reference);
 }
 
-int variable_is_replaceable(char* argument, ast* source, ast* function, symbol* table) {
+int variable_is_replaceable(char* variable, ast* source, ast* function, symbol* table) {
     opt_symbol* tmp;
     int result;   
 
     tmp = malloc(sizeof(struct opt_symbol)); 
     tmp->is_same_symbol = 1;
     tmp->symbol = NULL;
-    variable_is_replaceable_private(argument, source, function, table, tmp);
+    variable_is_replaceable_private(variable, source, function, table, tmp);
     result = (tmp->is_same_symbol) ? 1 : 0;
     free(tmp);
 
     return result;
 }
 
-int variables_are_replaceable(ast* variables, ast* source, ast* function, symbol* table) {
-    if (variables == NULL)
-        return 1;
-    
-    if (variables->type == AST_ID)
-        return variable_is_replaceable(variables->id, source, function, table);
+int variables_are_replaceable(ast* source, ast* function, symbol* table) {
+    int result = 1;
+    symbol *variable = NULL, *tmp = NULL;
+    symbol_build_table(function, &tmp);
+    variable = tmp;
 
-    if (variables->type == AST_LIST)
-        return variables_are_replaceable(variables->left, source, function, table) &&
-            variables_are_replaceable(variables->right, source, function, table);
-    
-    return 0;
+    while (result && variable != NULL) {
+        result = variable_is_replaceable(variable->identifier, source, function, table);
+        variable = variable->next;
+    }
+    symbol_free(tmp);
+
+    return result;
 }
 
-char* get_argument(char* argument, ast* source, ast* function) {
-    char* tmp = NULL;
-    switch (source->type)
-    {
+ast* get_argument(char* argument, ast* source, ast* function) {
+    ast* tmp = NULL;
+
+    if (function == NULL)
+        return NULL;
+        
+    switch (function->type) {
         case AST_NUMBER:
             break;
         case AST_INCLUDE:
             break;
         case AST_ID:
             if (strcmp(argument, function->id) == 0) 
-                tmp = strdup(source->id);
+                tmp = ast_copy(source);
             break;
         default:
             tmp = get_argument(argument, source->left, function->left);
@@ -86,11 +86,9 @@ char* get_argument(char* argument, ast* source, ast* function) {
 
 ast* replace_private(ast* arguments, ast* source, ast* function) {
     ast* result = NULL;
-    char* argument;
     
     if (arguments->type == AST_ID) {
-        argument = get_argument(arguments->id, source, function);
-        result = ast_new_id(argument);
+        result = get_argument(arguments->id, source, function);
     }
     
     if (arguments->type == AST_LIST) {
@@ -120,12 +118,11 @@ void optimize_function(ast* source, ast* function, symbol* table) {
         return; 
 
     if (source->type == AST_LIST) {
-        if (are_identical(source->left, function->right->left->left)) {
+        if (are_similar(source->left, function->right->left->left)) {
             ast* function_body = function->right->left->left;
-            ast* arguments = function->left->right;
             ast* tmp;
 
-            if (variables_are_replaceable(arguments, source->left, function_body, table)) {
+            if (variables_are_replaceable(source->left, function_body, table)) {
                 tmp = replace(source->left, function);
                 ast_free(source->left);
                 source->left = tmp;
