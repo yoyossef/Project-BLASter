@@ -59,7 +59,7 @@ ast* ast_copy(ast* T) {
 int is_arithmetic_operation(ast* T) {
     if (T == NULL)
         return 0;
-    if (T->type == AST_INCLUDE || T->type == AST_VECT_ITEM) 
+    if (T->type == AST_INCLUDE || T->type == AST_VECT_ITEM || T->type == AST_MAT_ITEM) 
         return 0; 
     if (T->type == AST_NUMBER || T->type == AST_ID) 
         return 1; 
@@ -149,6 +149,16 @@ void ast_print(ast* ast, int indent) {
             break;
         case AST_VECT_ITEM:
             printf("ITEM VECTOR\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_TYPE_INT_MAT:
+            printf("INT MATRIX\n");
+            ast_print(ast->left, indent + 1);
+            ast_print(ast->right, indent + 1);
+            break;
+        case AST_MAT_ITEM:
+            printf("ITEM MATRIX\n");
             ast_print(ast->left, indent + 1);
             ast_print(ast->right, indent + 1);
             break;

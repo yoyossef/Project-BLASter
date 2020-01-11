@@ -30,6 +30,7 @@
 %type <ast> main
 %type <ast> function
 %type <ast> functions
+%type <ast> argument
 %type <ast> arguments
 %type <ast> block
 %type <ast> instructions_list
@@ -41,6 +42,7 @@
 %type <ast> affectation
 %type <ast> declaration
 %type <ast> arith_expr
+%type <ast> id
 %type <ast> condition
 
 %token INCLUDE DEFINE MAIN RETURN
@@ -70,6 +72,7 @@ includes:
 
 include:
     INCLUDE '<' LIB '>'     { $$ = ast_new_include($3); }
+    | INCLUDE '"' LIB '"'   { $$ = ast_new_include($3); }
     ;
 
 defines:
@@ -99,8 +102,14 @@ function:
     ;
 
 arguments:
-    ID ',' arguments        { $$ = ast_new_operation(AST_LIST, ast_new_id($1), $3); }
-    | ID                    { $$ = ast_new_id($1); }
+    argument ',' arguments      { $$ = ast_new_operation(AST_LIST, $1, $3); }
+    | argument                  { $$ = $1; }
+    ;
+
+argument:
+    INT ID                      { $$ = ast_new_id($2); }
+    | INT '*' ID                { $$ = ast_new_id($3); }
+    | INT '*' '*' ID            { $$ = ast_new_id($4); }
     ;
 
 main:
@@ -156,8 +165,9 @@ instruction_else:
     ;
 
 affectation:
-    ID '=' arith_expr   { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
-    | ID INCREMENT      { $$ = ast_new_operation(AST_INCREMENT, ast_new_id($1), ast_new_number(1)); }
+    ID '=' arith_expr           { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
+    | INT ID '=' arith_expr     { $$ = ast_new_operation(AST_AFFECT, ast_new_id($2), $4); }
+    | ID INCREMENT              { $$ = ast_new_operation(AST_INCREMENT, ast_new_id($1), ast_new_number(1)); }
     | ID '[' NUMBER ']' '=' arith_expr   {
         ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3));
         $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
@@ -169,8 +179,12 @@ affectation:
     ;
 
 declaration:
-    INT ID                      { $$ = ast_new_operation(AST_TYPE_INT, ast_new_id($2), NULL); }
-    | INT ID '[' NUMBER ']'     { $$ = ast_new_operation(AST_TYPE_INT_VECT, ast_new_id($2), ast_new_number($4)); }
+    INT ID                          { $$ = ast_new_operation(AST_TYPE_INT, ast_new_id($2), NULL); }
+    | INT ID '[' id ']'             { $$ = ast_new_operation(AST_TYPE_INT_VECT, ast_new_id($2), $4); }
+    | INT ID '[' id ']' '[' id ']'  { 
+        ast* tmp = ast_new_operation(AST_LIST, $4, $7);
+        $$ = ast_new_operation(AST_TYPE_INT_MAT, ast_new_id($2), tmp); 
+    }
     ;
 
 arith_expr:
@@ -179,11 +193,17 @@ arith_expr:
     | arith_expr '*' arith_expr     { $$ = ast_new_operation(AST_MUL, $1, $3); }
     | arith_expr '/' arith_expr     { $$ = ast_new_operation(AST_DIV, $1, $3); }
     | '(' arith_expr ')'            { $$ = $2; }
-    | ID                            { $$ = ast_new_id($1); }
-    | NUMBER                        { $$ = ast_new_number($1); }
-    | ID '[' NUMBER ']'             { $$ = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3)); }
-    | ID '[' ID ']'                 { $$ = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_id($3)); }
+    | id                            { $$ = $1; }
+    | ID '[' id ']'                 { $$ = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), $3); }
+    | ID '[' id ']' '[' id ']'  { 
+        ast* tmp = ast_new_operation(AST_LIST, $3, $6);
+        $$ = ast_new_operation(AST_MAT_ITEM, ast_new_id($1), tmp); 
+    }
     ;
+
+id:
+    ID                  { $$ = ast_new_id($1); }
+    | NUMBER            { $$ = ast_new_number($1); }
 
 condition:
     condition OR condition          { $$ = ast_new_operation(AST_OR, $1, $3); }
@@ -263,7 +283,7 @@ int main(int argc, char* argv[]) {
     }
     while(next_option != -1);
 
-    FILE* output_fd;
+    // FILE* output_fd = NULL;
     struct symbol* symbol_table = NULL;
     struct ast* source_code = NULL;
     struct ast* library = NULL;
@@ -304,12 +324,12 @@ int main(int argc, char* argv[]) {
         printf("=====AST AFTER=====\n");
         ast_print(source_code, 0);
     }
-    if (output_filename == NULL)
-        output_fd = fopen("output.c", "w");
-    else
-        output_fd = fopen(output_filename, "w");
-    print_include(library, output_fd);
-    ast_to_source(source_code, 0, 0, output_fd);
+    // if (output_filename == NULL)
+    //     output_fd = fopen("output.c", "w");
+    // else
+    //     output_fd = fopen(output_filename, "w");
+    // print_include(library, output_fd);
+    // ast_to_source(source_code, 0, 0, output_fd);
 
 
     // Be clean.
@@ -318,7 +338,7 @@ int main(int argc, char* argv[]) {
     ast_free(library);
     symbol_free(symbol_table);
     fclose(yyin);
-    fclose(output_fd);
+    // fclose(output_fd);
     
     return 0;
 }

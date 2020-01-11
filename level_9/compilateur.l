@@ -47,7 +47,7 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 
 
-[=+\-\*/()<>\[\]]       { return yytext[0]; }  
+[=+\-\*/()<>\[\]""]     { return yytext[0]; }  
 [{},;]                  { return yytext[0]; }  
 [\n\t ]                 { }  
 .                       { printf("Caractere inconnu: %s", yytext); }
