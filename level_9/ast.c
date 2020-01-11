@@ -273,13 +273,20 @@ void print_indent(int indent) {
         printf("\t");
 }
 
-void print_include(ast* T){
+void fprint_indent(int indent, FILE* flux) {
+    if (indent == 0)
+        return;
+    for (int i = 0; i < indent; i++)
+        fprintf(flux, "\t");
+}
+
+void print_include(ast* T, FILE* flux){
     if (T == NULL)
         return;
 
     switch (T->type) {
         case AST_INCLUDE:
-            printf("#include <%s>\n", T->id);
+            fprintf(flux,"#include <%s>\n", T->id);
             return;
             break;
         case AST_LIST:
@@ -288,67 +295,67 @@ void print_include(ast* T){
             return;
             break;
     }
-    print_include(T->left);
-    print_include(T->right);
+    print_include(T->left, flux);
+    print_include(T->right, flux);
 }
 
-void ast_parse_opt_fun(ast* T) {
+void ast_parse_opt_fun(ast* T, FILE* flux) {
     if (T == NULL)
         return;
     switch(T->type) {
         case AST_FUN:
-            printf("%s(", T->left->id);
-            ast_parse_opt_fun(T->right);
-            printf(");\n");
+            fprintf(flux,"%s(", T->left->id);
+            ast_parse_opt_fun(T->right, flux);
+            fprintf(flux,");\n");
             break;
         case AST_LIST:
-            ast_parse_opt_fun(T->left);
-            printf(", ");
-            ast_parse_opt_fun(T->right);
+            ast_parse_opt_fun(T->left, flux);
+            fprintf(flux,", ");
+            ast_parse_opt_fun(T->right, flux);
             break;
         default:
-            ast_to_source(T, 0, 0);
+            ast_to_source(T, 0, 0, flux);
             break;
     }
 }
 
-void ast_to_source(ast* ast, int indent, char is_for) {
+void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
     int new_indent = indent;
     // Support of declaration/definition statements (e.g `int a = 3;`)
     if (ast->type == AST_LIST && ast->right != NULL && ast->left->type == AST_TYPE_INT 
         && ast->right->type == AST_AFFECT) {
-        print_indent(new_indent);
-        printf("int %s = ", ast->left->left->id);
-        ast_to_source(ast->right->right, indent, is_for);
-        printf(";\n");
+        fprint_indent(new_indent, flux);
+        fprintf(flux,"int %s = ", ast->left->left->id);
+        ast_to_source(ast->right->right, indent, is_for, flux);
+        fprintf(flux,";\n");
         return;
     }
 
     switch(ast->type) {
         case AST_INCLUDE:
-            printf("#include <%s>\n", ast->id);
+            fprintf(flux,"#include <%s>\n", ast->id);
             break;
         case AST_DEFINE:
-            printf("#define ");
+            fprintf(flux,"#define ");
             break;
         case AST_MAIN:
-            printf("int main(int argc, char *argv[]) ");
+            fprintf(flux,"int main(int argc, char *argv[]) ");
             break;
         case AST_FUN:
-            ast_parse_opt_fun(ast);
+            ast_parse_opt_fun(ast, flux);
             return;
             break;
         case AST_ID:
-            printf("%s", ast->id);
+            fprintf(flux,"%s", ast->id);
             break;
         case AST_NUMBER:
-            printf("%d", ast->number);
+            fprintf(flux,"%d", ast->number);
             break;
         case AST_TYPE_INT:
-            printf("int ");
+            fprintf(flux,"int ");
             break;
         case AST_TYPE_INT_VECT:
-            printf("int ");
+            fprintf(flux,"int ");
             break;
         case AST_VECT_ITEM:
             break;
@@ -358,115 +365,115 @@ void ast_to_source(ast* ast, int indent, char is_for) {
             break;
         case AST_FOR:
             is_for = 1;
-            printf("for (");
+            fprintf(flux,"for (");
             break;
         case AST_WHILE:
-            printf("while (");
+            fprintf(flux,"while (");
             break;
         case AST_IF:
-            printf("if (");
+            fprintf(flux,"if (");
             break;
         case AST_ELSE_IF:
-            printf("else if (");
+            fprintf(flux,"else if (");
             break;
         case AST_ELSE:
-            print_indent(new_indent);
-            printf("else ");
+            fprint_indent(new_indent, flux);
+            fprintf(flux,"else ");
             break;
         case AST_LIST:
             if (!is_for && ast->left->type != AST_LIST)
-                print_indent(new_indent);
+                fprint_indent(new_indent, flux);
             break;
         case AST_BLOCK:
-            printf("{\n");
+            fprintf(flux,"{\n");
             new_indent++;
             break;
         case AST_RETURN:
-            printf("return ");
+            fprintf(flux,"return ");
             break;
         default:
-            printf("(");
+            fprintf(flux,"(");
             break;
     };
 
     if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER && ast->left != NULL)
-        ast_to_source(ast->left, new_indent, is_for);
+        ast_to_source(ast->left, new_indent, is_for, flux);
 
     // Adding the semicolumn after the for condition
     if (is_for && ast->type == AST_LIST && ast->left != NULL 
         && ast->left->type >= 15 && ast->left->type <= 22)
-        printf(";");
+        fprintf(flux,";");
 
     switch(ast->type) {
         case AST_TYPE_INT:
-            printf(";\n");
+            fprintf(flux,";\n");
             break;
         case AST_TYPE_INT_VECT:
-            printf("[");
+            fprintf(flux,"[");
             break;
         case AST_VECT_ITEM:
-            printf("[");
+            fprintf(flux,"[");
             break;
         case AST_ADD:
-            printf("+");
+            fprintf(flux,"+");
             break;
         case AST_SUB:
-            printf("-");
+            fprintf(flux,"-");
             break;
         case AST_MUL:
-            printf("*");
+            fprintf(flux,"*");
             break;
         case AST_DIV:
-            printf("/");
+            fprintf(flux,"/");
             break;
         case AST_AFFECT:
-            printf("=");
+            fprintf(flux,"=");
             break;
         case AST_INCREMENT:
             if (ast->right->number == 1)
-                printf("++");
+                fprintf(flux,"++");
             else
-                printf("+= %d", ast->right->number);
+                fprintf(flux,"+= %d", ast->right->number);
             break;
         case AST_AND:
-            printf("&&");
+            fprintf(flux,"&&");
             break;
         case AST_OR:
-            printf("||");
+            fprintf(flux,"||");
             break;
         case AST_EQUAL:
-            printf("==");
+            fprintf(flux,"==");
             break;
         case AST_DIFF:
-            printf("!=");
+            fprintf(flux,"!=");
             break;
         case AST_GEQ:
-            printf(">=");
+            fprintf(flux,">=");
             break;
         case AST_LEQ:
-            printf("<=");
+            fprintf(flux,"<=");
             break;
         case AST_SUP:
-            printf(">");
+            fprintf(flux,">");
             break;
         case AST_INF:
-            printf("<");
+            fprintf(flux,"<");
             break;
         case AST_FOR:
-            printf(") ");
+            fprintf(flux,") ");
             is_for = 0;
             break;
         case AST_WHILE:
-            printf(") ");
+            fprintf(flux,") ");
             break;
         case AST_IF:
-            printf(") ");
+            fprintf(flux,") ");
             break;
         case AST_ELSE_IF:
-            printf(") ");
+            fprintf(flux,") ");
             break;
         case AST_DEFINE:
-            printf(" ");
+            fprintf(flux," ");
             break;
         default:
             break;
@@ -479,41 +486,41 @@ void ast_to_source(ast* ast, int indent, char is_for) {
 
     if (ast->type != AST_INCLUDE && ast->type != AST_ID && ast->type != AST_NUMBER
     && ast->type != AST_INCREMENT && ast->right != NULL)
-        ast_to_source(ast->right, new_indent, is_for);
+        ast_to_source(ast->right, new_indent, is_for, flux);
 
     switch (ast->type) {
         case AST_DEFINE:
-            printf("\n");
+            fprintf(flux,"\n");
         break;
         case AST_TYPE_INT_VECT:
-            printf("];\n");
+            fprintf(flux,"];\n");
             break;
         case AST_VECT_ITEM:
-            printf("]");
+            fprintf(flux,"]");
             break;
         case AST_AFFECT:
             if (is_for < 2)
-                printf(";");
+                fprintf(flux,";");
             if (!is_for)
-                printf("\n");
+                fprintf(flux,"\n");
             break;
         case AST_INCREMENT:
             if (is_for < 2)
-                printf(";");
+                fprintf(flux,";");
             if (!is_for)
-                printf("\n");
+                fprintf(flux,"\n");
             break;
         case AST_BLOCK:
             new_indent--;
-            print_indent(new_indent);
-            printf("}\n");
+            fprint_indent(new_indent, flux);
+            fprintf(flux,"}\n");
             break;
         case AST_RETURN:
-            printf(";\n");
+            fprintf(flux,";\n");
             break;
         default:
             break;
     }
     if ((ast->type >= 9 && ast->type <= 12) || (ast->type >= 15 && ast->type <= 22))
-        printf(")");
+        fprintf(flux,")");
 }

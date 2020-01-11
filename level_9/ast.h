@@ -35,20 +35,21 @@ int are_similar(ast*, ast*);
 void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);
+void fprint_indent(int, FILE*);
 
 /**
  * @brief Prints the includes of a lib
  */
-void print_include(ast*);
+void print_include(ast*, FILE*);
 
 /**
  * @brief Parses a function call AST and prints it w/ arguments
  */
-void ast_parse_opt_fun(ast*);
+void ast_parse_opt_fun(ast*, FILE*);
 
 /**
  * @brief Parses an AST and prints the code w/ indents
  */
-void ast_to_source(ast*, int, char);
+void ast_to_source(ast*, int, char, FILE*);
 
 #endif

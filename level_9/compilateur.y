@@ -223,7 +223,7 @@ void print_version() {
 }
 
 int main(int argc, char* argv[]) {
-    int tos_flag = 0, ast_flag = 0, output_flag = 0;
+    int tos_flag = 0, ast_flag = 0;
     int next_option;
 	const char* const short_options = "vtao:";
 
@@ -235,7 +235,7 @@ int main(int argc, char* argv[]) {
         {NULL,              0,              NULL,  0   }
     };
 
-    // const char* output_filename = NULL;
+    const char* output_filename = NULL;
 
     do {
         next_option = getopt_long (argc, argv, short_options, long_options, NULL);
@@ -250,8 +250,7 @@ int main(int argc, char* argv[]) {
                 ast_flag=1;
                 break;
             case 'o':
-                output_flag=1;
-                // output_filename = optarg;
+                output_filename = optarg;
                 break;
             case '?':
                 print_usage();
@@ -264,6 +263,7 @@ int main(int argc, char* argv[]) {
     }
     while(next_option != -1);
 
+    FILE* output_fd;
     struct symbol* symbol_table = NULL;
     struct ast* source_code = NULL;
     struct ast* library = NULL;
@@ -304,15 +304,21 @@ int main(int argc, char* argv[]) {
         printf("=====AST AFTER=====\n");
         ast_print(source_code, 0);
     }
-    print_include(library);
-    ast_to_source(source_code, 0, 0);
-    
+    if (output_filename == NULL)
+        output_fd = fopen("output.c", "w");
+    else
+        output_fd = fopen(output_filename, "w");
+    print_include(library, output_fd);
+    ast_to_source(source_code, 0, 0, output_fd);
+
+
     // Be clean.
     lex_free();
     ast_free(source_code);
     ast_free(library);
     symbol_free(symbol_table);
     fclose(yyin);
+    fclose(output_fd);
     
     return 0;
 }

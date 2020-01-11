@@ -8,3 +8,4 @@ main
 *test*
 *.vscode
 level_?/level_?*
+output.c
