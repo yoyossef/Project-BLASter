@@ -9,4 +9,5 @@ main
 *.vscode
 level_?/level_?*
 level_?/blaster*
+!level_?_test.c
 output.c
