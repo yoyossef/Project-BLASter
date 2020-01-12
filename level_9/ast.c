@@ -329,6 +329,31 @@ void ast_parse_opt_fun(ast* T, FILE* flux) {
     }
 }
 
+void ast_parse_mat(ast* T, FILE* flux) {
+    if (T == NULL)
+        return;
+    switch (T->type) {
+        case AST_TYPE_INT_MAT:
+            fprintf(flux,"int %s[", T->left->id);
+            ast_parse_mat(T->right, flux);
+            fprintf(flux, ";\n");
+            break;
+        case AST_MAT_ITEM:
+            fprintf(flux, "%s[", T->left->id);
+            ast_parse_mat(T->right, flux);
+            break;
+        case AST_LIST:
+            ast_parse_mat(T->left, flux);
+            fprintf(flux,"][");
+            ast_parse_mat(T->right, flux);
+            fprintf(flux,"]");
+            break;
+        default:
+            ast_to_source(T, 0, 0, flux);
+            break;
+    }
+}
+
 void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
     int new_indent = indent;
     // Support of declaration/definition statements (e.g `int a = 3;`)
@@ -368,6 +393,14 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
             fprintf(flux,"int ");
             break;
         case AST_VECT_ITEM:
+            break;
+        case AST_TYPE_INT_MAT:
+            ast_parse_mat(ast, flux);
+            return;
+            break;
+        case AST_MAT_ITEM:
+            ast_parse_mat(ast, flux);
+            return;
             break;
         case AST_AFFECT:
             break;
@@ -411,7 +444,7 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
 
     // Adding the semicolumn after the for condition
     if (is_for && ast->type == AST_LIST && ast->left != NULL 
-        && ast->left->type >= 15 && ast->left->type <= 22)
+        && ast->left->type >= 17 && ast->left->type <= 24)
         fprintf(flux,";");
 
     switch(ast->type) {
@@ -531,6 +564,6 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
         default:
             break;
     }
-    if ((ast->type >= 9 && ast->type <= 12) || (ast->type >= 15 && ast->type <= 22))
+    if ((ast->type >= 11 && ast->type <= 14) || (ast->type >= 17 && ast->type <= 24))
         fprintf(flux,")");
 }

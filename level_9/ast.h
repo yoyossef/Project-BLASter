@@ -47,6 +47,8 @@ void print_include(ast*, FILE*);
  */
 void ast_parse_opt_fun(ast*, FILE*);
 
+void ast_parse_mat(ast*, FILE*);
+
 /**
  * @brief Parses an AST and prints the code w/ indents
  */
