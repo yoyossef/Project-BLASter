@@ -168,13 +168,14 @@ affectation:
     ID '=' arith_expr           { $$ = ast_new_operation(AST_AFFECT, ast_new_id($1), $3); }
     | INT ID '=' arith_expr     { $$ = ast_new_operation(AST_AFFECT, ast_new_id($2), $4); }
     | ID INCREMENT              { $$ = ast_new_operation(AST_INCREMENT, ast_new_id($1), ast_new_number(1)); }
-    | ID '[' NUMBER ']' '=' arith_expr   {
-        ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_number($3));
+    | ID '[' id ']' '=' arith_expr   {
+        ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), $3);
         $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
     }
-    | ID '[' ID ']' '=' arith_expr   {
-        ast* tmp = ast_new_operation(AST_VECT_ITEM, ast_new_id($1), ast_new_id($3));
-        $$ = ast_new_operation(AST_AFFECT, tmp, $6); 
+    | ID '[' id ']' '[' id ']' '=' arith_expr   {
+        ast* tmp = ast_new_operation(AST_LIST, $3, $6);
+        tmp = ast_new_operation(AST_MAT_ITEM, ast_new_id($1), tmp);
+        $$ = ast_new_operation(AST_AFFECT, tmp, $9); 
     }
     ;
 
@@ -283,7 +284,7 @@ int main(int argc, char* argv[]) {
     }
     while(next_option != -1);
 
-    // FILE* output_fd = NULL;
+    FILE* output_fd = NULL;
     struct symbol* symbol_table = NULL;
     struct ast* source_code = NULL;
     struct ast* library = NULL;
@@ -324,12 +325,12 @@ int main(int argc, char* argv[]) {
         printf("=====AST AFTER=====\n");
         ast_print(source_code, 0);
     }
-    // if (output_filename == NULL)
-    //     output_fd = fopen("output.c", "w");
-    // else
-    //     output_fd = fopen(output_filename, "w");
-    // print_include(library, output_fd);
-    // ast_to_source(source_code, 0, 0, output_fd);
+    if (output_filename == NULL)
+        output_fd = fopen("output.c", "w");
+    else
+        output_fd = fopen(output_filename, "w");
+    print_include(library, output_fd);
+    ast_to_source(source_code, 0, 0, output_fd);
 
 
     // Be clean.
@@ -338,7 +339,7 @@ int main(int argc, char* argv[]) {
     ast_free(library);
     symbol_free(symbol_table);
     fclose(yyin);
-    // fclose(output_fd);
+    fclose(output_fd);
     
     return 0;
 }
