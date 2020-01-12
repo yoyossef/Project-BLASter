@@ -354,6 +354,22 @@ void ast_parse_mat(ast* T, FILE* flux) {
     }
 }
 
+char is_arith_op(ast* T) {
+    if (T->type == AST_ADD || T->type == AST_SUB || 
+        T->type == AST_MUL || T->type == AST_DIV)
+        return 1;
+    else
+        return 0;
+}
+char is_bool_op(ast* T) {
+    if (T->type == AST_AND || T->type == AST_OR || T->type == AST_EQUAL
+        || T->type == AST_DIFF || T->type == AST_GEQ || T->type == AST_LEQ 
+        || T->type == AST_SUP || T->type == AST_INF)
+        return 1;
+    else 
+        return 0;
+}
+
 void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
     int new_indent = indent;
     // Support of declaration/definition statements (e.g `int a = 3;`)
@@ -443,8 +459,7 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
         ast_to_source(ast->left, new_indent, is_for, flux);
 
     // Adding the semicolumn after the for condition
-    if (is_for && ast->type == AST_LIST && ast->left != NULL 
-        && ast->left->type >= 17 && ast->left->type <= 24)
+    if (is_for && ast->type == AST_LIST && ast->left != NULL && is_bool_op(ast->left))
         fprintf(flux,";");
 
     switch(ast->type) {
@@ -564,6 +579,6 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
         default:
             break;
     }
-    if ((ast->type >= 11 && ast->type <= 14) || (ast->type >= 17 && ast->type <= 24))
+    if (is_arith_op(ast) || is_bool_op(ast))
         fprintf(flux,")");
 }

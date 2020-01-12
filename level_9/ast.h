@@ -36,6 +36,8 @@ void ast_free(ast*);
 void ast_print(ast*, int);
 void print_indent(int);
 void fprint_indent(int, FILE*);
+char is_arith_op(ast*);
+char is_bool_op(ast*);
 
 /**
  * @brief Prints the includes of a lib
