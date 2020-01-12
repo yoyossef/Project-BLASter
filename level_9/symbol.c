@@ -82,6 +82,14 @@ void symbol_build_table(struct ast* ast, struct symbol** symbol_table) {
                 symbol_add(symbol_table, strdup(ast->id));
             }
             break;
+        case AST_DEFINE:
+            tmp = symbol_lookup(*symbol_table, ast->left->id);
+            if (tmp == NULL) {
+                tmp = symbol_add(symbol_table, strdup(ast->left->id));
+                tmp->is_constant = 1;
+                tmp->value = ast->right->number;
+            }
+            break;
         default:
             symbol_build_table(ast->left, symbol_table);
             symbol_build_table(ast->right, symbol_table);

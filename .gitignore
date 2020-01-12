@@ -8,4 +8,5 @@ main
 *test*
 *.vscode
 level_?/level_?*
+level_?/blaster*
 output.c
