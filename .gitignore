@@ -10,4 +10,6 @@ main
 level_?/level_?*
 level_?/blaster*
 !level_?_test.c
+blaster/blaster*
+!level_?_test.c
 output.c
