@@ -13,7 +13,7 @@ comment         (\/\/.*)|(\/\*([^*]|\*+[^*/])*\*+\/)
 
 "#include"      { return INCLUDE; }
 "#define"       { return DEFINE; }
-"int main(int argc, char *argv[])"      { return MAIN; }
+"int main()"    { return MAIN; }
 
 
 

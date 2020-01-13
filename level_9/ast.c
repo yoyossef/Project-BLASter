@@ -390,7 +390,7 @@ void ast_to_source(ast* ast, int indent, char is_for, FILE* flux) {
             fprintf(flux,"#define ");
             break;
         case AST_MAIN:
-            fprintf(flux,"int main(int argc, char *argv[]) ");
+            fprintf(flux,"int main() ");
             break;
         case AST_FUN:
             ast_parse_opt_fun(ast, flux);

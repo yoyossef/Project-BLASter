@@ -1,7 +1,7 @@
 #define N 18
 #define M 17
 
-int main(int argc, char *argv[]) {
+int main() {
     int x[N];
     int y[N];
     int mat[N][N];
