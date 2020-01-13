@@ -22,4 +22,6 @@ int main() {
     for (int i = 0; i < 1; i++) {
         w[i] = N * v[i] + w[i];
     }
+
+    return 0;
 }

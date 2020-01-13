@@ -14,4 +14,6 @@ int main() {
         }
         y[i] = N*tmp + M*y[i];
     }
+
+    return 0;
 }

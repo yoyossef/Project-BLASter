@@ -39,4 +39,6 @@ int main() {
             B[j][i] = A[i][j];
         }
     }
+
+    return 0;
 }
