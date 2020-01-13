@@ -14,7 +14,7 @@ Project BLASter is a source-to-source compiler that replaces specified linear al
 
 ## Usage example
 
-`./blaster level_3_test.c lib_3.c -o optimized.c`
+`./blaster level_3_test.c lib_3.c -o level_3_test_optimized.c`
 
 ## Contributors
 Team Buffalo (M1 SIL 2019-2020, Université de Strasbourg):
